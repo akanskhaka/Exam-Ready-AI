@@ -1,6 +1,7 @@
 # Python artifacts and environments
 __pycache__/
 *.py[cod]
+*$py.class
 venv/
 .venv/
 env/
@@ -10,9 +11,22 @@ ENV/
 .env
 .env.*
 !.env.example
+
+# Local databases
 *.db
 *.sqlite
 *.sqlite3
+
+# Test and coverage output
+.pytest_cache/
+.coverage
+htmlcov/
+
+# Packaging output
+.Python
+build/
+dist/
+*.egg-info/
 
 # IDE and operating-system files
 .vscode/
