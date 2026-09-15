@@ -1,0 +1,1611 @@
+/* =========================================
+   GENERAL
+========================================= */
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+
+    font-family: Arial, Helvetica, sans-serif;
+
+    background-color: #f5f7fb;
+
+    color: #222;
+}
+
+
+/* =========================================
+   SIDEBAR
+========================================= */
+
+.sidebar {
+
+    position: fixed;
+
+    left: 0;
+
+    top: 0;
+
+    width: 250px;
+
+    height: 100vh;
+
+    background: #ffffff;
+
+    padding: 30px 20px;
+
+    border-right: 1px solid #e6e6e6;
+
+    z-index: 1000;
+}
+
+
+/* =========================================
+   LOGO
+========================================= */
+
+.logo {
+
+    text-align: center;
+
+    margin-bottom: 50px;
+}
+
+.logo h2 {
+
+    font-size: 24px;
+
+    letter-spacing: 1px;
+
+    color: #222;
+}
+
+.logo span {
+
+    color: #6c63ff;
+}
+
+
+/* =========================================
+   MENU TITLE
+========================================= */
+
+.menu-title {
+
+    margin-bottom: 15px;
+
+    padding-left: 15px;
+}
+
+.menu-title p {
+
+    font-size: 12px;
+
+    font-weight: bold;
+
+    color: #999;
+
+    letter-spacing: 2px;
+}
+
+
+/* =========================================
+   MENU
+========================================= */
+
+.menu {
+
+    list-style: none;
+}
+
+.menu li {
+
+    margin-bottom: 8px;
+}
+
+
+/* =========================================
+   MENU LINKS
+========================================= */
+
+.menu-link {
+
+    display: flex;
+
+    align-items: center;
+
+    gap: 15px;
+
+    padding: 14px 16px;
+
+    text-decoration: none;
+
+    color: #777;
+
+    border-radius: 10px;
+
+    transition: all 0.3s ease;
+}
+
+
+.menu-link i {
+
+    width: 20px;
+
+    font-size: 17px;
+}
+
+
+/* HOVER */
+
+.menu-link:hover {
+
+    background-color: #f0efff;
+
+    color: #6c63ff;
+}
+
+
+/* ACTIVE */
+
+.menu-link.active {
+
+    background-color: #6c63ff;
+
+    color: white;
+
+    box-shadow:
+        0 5px 15px
+        rgba(108, 99, 255, 0.25);
+}
+
+
+/* =========================================
+   MAIN CONTENT
+========================================= */
+
+.main-content {
+
+    margin-left: 250px;
+
+    min-height: 100vh;
+
+    padding: 30px 40px;
+}
+
+
+/* =========================================
+   TOP BAR
+========================================= */
+
+.topbar {
+
+    display: flex;
+
+    justify-content: space-between;
+
+    align-items: center;
+
+    margin-bottom: 30px;
+}
+
+.topbar h1 {
+
+    font-size: 30px;
+
+    margin-bottom: 7px;
+}
+
+.topbar p {
+
+    color: #888;
+
+    font-size: 14px;
+}
+
+
+/* =========================================
+   PROFILE
+========================================= */
+
+.profile {
+
+    display: flex;
+
+    align-items: center;
+
+    gap: 10px;
+
+    font-weight: 600;
+}
+
+.profile i {
+
+    font-size: 35px;
+
+    color: #6c63ff;
+}
+
+
+/* =========================================
+   WELCOME CARD
+========================================= */
+
+.welcome-card {
+
+    background:
+
+        linear-gradient(
+            135deg,
+            #6c63ff,
+            #8b84ff
+        );
+
+    color: white;
+
+    padding: 30px;
+
+    border-radius: 15px;
+
+    margin-bottom: 25px;
+
+    display: flex;
+
+    justify-content: space-between;
+
+    align-items: center;
+}
+
+
+.welcome-card h2 {
+
+    margin-bottom: 10px;
+}
+
+.welcome-card p {
+
+    opacity: 0.9;
+
+    line-height: 1.6;
+
+    max-width: 650px;
+}
+
+
+/* READINESS */
+
+.readiness {
+
+    text-align: center;
+}
+
+.readiness span {
+
+    display: block;
+
+    font-size: 13px;
+
+    margin-bottom: 5px;
+}
+
+.readiness strong {
+
+    font-size: 40px;
+}
+
+
+/* =========================================
+   DASHBOARD CARDS
+========================================= */
+
+.cards {
+
+    display: grid;
+
+    grid-template-columns:
+        repeat(4, 1fr);
+
+    gap: 20px;
+
+    margin-bottom: 35px;
+}
+
+
+.card {
+
+    background: white;
+
+    padding: 25px;
+
+    border-radius: 15px;
+
+    box-shadow:
+        0 5px 20px
+        rgba(0, 0, 0, 0.05);
+
+    transition:
+        transform 0.3s ease;
+}
+
+
+.card:hover {
+
+    transform: translateY(-5px);
+}
+
+
+.card i {
+
+    font-size: 25px;
+
+    color: #6c63ff;
+
+    margin-bottom: 15px;
+}
+
+
+.card h3 {
+
+    margin-bottom: 8px;
+}
+
+
+.card p {
+
+    color: #777;
+}
+
+
+/* =========================================
+   PROGRESS BAR
+========================================= */
+
+.progress-bar {
+
+    width: 100%;
+
+    height: 7px;
+
+    background: #eeeeee;
+
+    border-radius: 10px;
+
+    margin-top: 15px;
+
+    overflow: hidden;
+}
+
+.progress {
+
+    height: 100%;
+
+    background: #6c63ff;
+
+    border-radius: 10px;
+}
+
+
+/* =========================================
+   SECTION HEADING
+========================================= */
+
+.section-heading {
+
+    font-size: 22px;
+
+    margin-bottom: 18px;
+}
+
+
+/* =========================================
+   DASHBOARD ACTIONS
+========================================= */
+
+.dashboard-actions {
+
+    display: grid;
+
+    grid-template-columns:
+        repeat(4, 1fr);
+
+    gap: 20px;
+}
+
+
+/* ACTION CARD */
+
+.action-card {
+
+    background: #ffffff;
+
+    border-radius: 15px;
+
+    padding: 25px;
+
+    box-shadow:
+        0 5px 20px
+        rgba(0, 0, 0, 0.05);
+
+    cursor: pointer;
+
+    transition: all 0.3s ease;
+}
+
+
+.action-card:hover {
+
+    transform: translateY(-6px);
+
+    box-shadow:
+        0 10px 25px
+        rgba(0, 0, 0, 0.08);
+}
+
+
+/* ACTION ICON */
+
+.action-icon {
+
+    width: 55px;
+
+    height: 55px;
+
+    border-radius: 12px;
+
+    background: #f0efff;
+
+    color: #6c63ff;
+
+    display: flex;
+
+    align-items: center;
+
+    justify-content: center;
+
+    font-size: 24px;
+
+    margin-bottom: 18px;
+}
+
+
+.action-card h3 {
+
+    margin-bottom: 10px;
+}
+
+
+.action-card p {
+
+    color: #777;
+
+    font-size: 14px;
+
+    line-height: 1.6;
+
+    min-height: 65px;
+}
+
+
+/* ACTION BUTTON */
+
+.action-card button {
+
+    margin-top: 15px;
+
+    border: none;
+
+    background: #6c63ff;
+
+    color: white;
+
+    padding: 10px 15px;
+
+    border-radius: 8px;
+
+    cursor: pointer;
+
+    font-size: 13px;
+}
+
+
+.action-card button:hover {
+
+    background: #574fd6;
+}
+
+
+/* =========================================
+   OTHER PAGES
+========================================= */
+
+.content-box {
+
+    background: white;
+
+    padding: 35px;
+
+    border-radius: 15px;
+
+    box-shadow:
+        0 5px 20px
+        rgba(0, 0, 0, 0.05);
+}
+
+
+.content-box h2 {
+
+    margin-bottom: 15px;
+}
+
+
+.content-box p {
+
+    color: #777;
+
+    line-height: 1.6;
+}
+
+
+/* =========================================
+   AI ASSISTANT
+========================================= */
+
+.ai-container {
+
+    background: white;
+
+    padding: 25px;
+
+    border-radius: 15px;
+
+    max-width: 850px;
+
+    box-shadow:
+        0 5px 20px
+        rgba(0, 0, 0, 0.05);
+}
+
+
+.chat-box {
+
+    height: 400px;
+
+    overflow-y: auto;
+
+    background: #f6f7fb;
+
+    padding: 20px;
+
+    border-radius: 12px;
+
+    margin: 20px 0;
+}
+
+
+.message {
+
+    padding: 12px 16px;
+
+    border-radius: 10px;
+
+    margin-bottom: 12px;
+
+    max-width: 75%;
+
+    line-height: 1.5;
+}
+
+
+.ai-message {
+
+    background: #eceaff;
+}
+
+
+.user-message {
+
+    background: #6c63ff;
+
+    color: white;
+
+    margin-left: auto;
+}
+
+
+.ai-input {
+
+    display: flex;
+
+    gap: 10px;
+}
+
+
+.ai-input input {
+
+    flex: 1;
+
+    padding: 14px;
+
+    border: 1px solid #ddd;
+
+    border-radius: 8px;
+
+    outline: none;
+}
+
+
+.ai-input button {
+
+    border: none;
+
+    background: #6c63ff;
+
+    color: white;
+
+    padding: 0 20px;
+
+    border-radius: 8px;
+
+    cursor: pointer;
+}
+
+
+/* =========================================
+   SUBJECTS
+========================================= */
+
+.subject-container {
+
+    background: white;
+
+    padding: 30px;
+
+    border-radius: 15px;
+
+    box-shadow:
+        0 5px 20px
+        rgba(0, 0, 0, 0.05);
+}
+
+
+.add-subject {
+
+    display: flex;
+
+    gap: 10px;
+
+    margin: 20px 0;
+}
+
+
+.add-subject input {
+
+    flex: 1;
+
+    padding: 13px;
+
+    border: 1px solid #ddd;
+
+    border-radius: 8px;
+
+    outline: none;
+}
+
+
+.add-subject button {
+
+    border: none;
+
+    background: #6c63ff;
+
+    color: white;
+
+    padding: 0 20px;
+
+    border-radius: 8px;
+
+    cursor: pointer;
+}
+
+
+.subject-list {
+
+    display: grid;
+
+    grid-template-columns:
+        repeat(2, 1fr);
+
+    gap: 15px;
+}
+
+
+.subject-card {
+
+    border: 1px solid #eeeeee;
+
+    padding: 20px;
+
+    border-radius: 12px;
+}
+
+
+.subject-card h3 {
+
+    margin-bottom: 12px;
+}
+
+
+/* =========================================
+   PROFILE
+========================================= */
+
+.profile-container {
+
+    background: white;
+
+    padding: 30px;
+
+    border-radius: 15px;
+
+    max-width: 650px;
+
+    box-shadow:
+        0 5px 20px
+        rgba(0, 0, 0, 0.05);
+}
+
+
+.profile-avatar {
+
+    text-align: center;
+
+    margin-bottom: 25px;
+}
+
+
+.profile-avatar i {
+
+    font-size: 80px;
+
+    color: #6c63ff;
+
+    margin-bottom: 10px;
+}
+
+
+.profile-form {
+
+    display: grid;
+
+    gap: 10px;
+}
+
+
+.profile-form label {
+
+    font-weight: bold;
+
+    font-size: 14px;
+
+    margin-top: 8px;
+}
+
+
+.profile-form input {
+
+    padding: 13px;
+
+    border: 1px solid #ddd;
+
+    border-radius: 8px;
+
+    outline: none;
+}
+
+
+.save-btn {
+
+    margin-top: 15px;
+
+    padding: 13px;
+
+    border: none;
+
+    background: #6c63ff;
+
+    color: white;
+
+    border-radius: 8px;
+
+    cursor: pointer;
+}
+
+
+/* =========================================
+   TIMER
+========================================= */
+
+.timer-container {
+
+    background: white;
+
+    max-width: 600px;
+
+    padding: 40px;
+
+    border-radius: 15px;
+
+    text-align: center;
+
+    box-shadow:
+        0 5px 20px
+        rgba(0, 0, 0, 0.05);
+}
+
+
+.timer-display {
+
+    font-size: 70px;
+
+    font-weight: bold;
+
+    color: #6c63ff;
+
+    margin: 30px 0;
+}
+
+
+.timer-buttons {
+
+    display: flex;
+
+    justify-content: center;
+
+    gap: 12px;
+}
+
+
+.timer-buttons button {
+
+    padding: 12px 25px;
+
+    border: none;
+
+    border-radius: 8px;
+
+    background: #6c63ff;
+
+    color: white;
+
+    cursor: pointer;
+}
+
+
+.timer-buttons .reset {
+
+    background: #555;
+}
+
+
+/* =========================================
+   RESPONSIVE
+========================================= */
+
+@media (max-width: 1100px) {
+
+    .cards {
+
+        grid-template-columns:
+            repeat(2, 1fr);
+    }
+
+
+    .dashboard-actions {
+
+        grid-template-columns:
+            repeat(2, 1fr);
+    }
+
+}
+
+
+@media (max-width: 900px) {
+
+    .sidebar {
+
+        width: 210px;
+    }
+
+
+    .main-content {
+
+        margin-left: 210px;
+
+        padding: 25px;
+    }
+
+}
+
+
+@media (max-width: 600px) {
+
+    .sidebar {
+
+        width: 70px;
+
+        padding: 25px 10px;
+    }
+
+
+    .logo h2 {
+
+        font-size: 0;
+    }
+
+
+    .logo h2::after {
+
+        content: "S";
+
+        font-size: 24px;
+
+        color: #6c63ff;
+    }
+
+
+    .menu-title {
+
+        display: none;
+    }
+
+
+    .menu-link {
+
+        justify-content: center;
+
+        padding: 15px 5px;
+    }
+
+
+    .menu-link span {
+
+        display: none;
+    }
+
+
+    .main-content {
+
+        margin-left: 70px;
+
+        padding: 20px;
+    }
+
+
+    .topbar h1 {
+
+        font-size: 24px;
+    }
+
+
+    .profile span {
+
+        display: none;
+    }
+
+
+    .cards {
+
+        grid-template-columns: 1fr;
+    }
+
+
+    .dashboard-actions {
+
+        grid-template-columns: 1fr;
+    }
+
+
+    .welcome-card {
+
+        flex-direction: column;
+
+        align-items: flex-start;
+
+        gap: 20px;
+    }
+
+
+    .subject-list {
+
+        grid-template-columns: 1fr;
+    }
+
+}
+/* =========================================================
+   CALENDAR
+========================================================= */
+
+.calendar-wrapper {
+
+    background: #ffffff;
+
+    border-radius: 15px;
+
+    padding: 25px;
+
+    box-shadow:
+        0 5px 20px rgba(0, 0, 0, 0.05);
+
+}
+
+
+
+/* =========================================================
+   CALENDAR HEADER
+========================================================= */
+
+.calendar-header {
+
+    display: flex;
+
+    align-items: center;
+
+    justify-content: space-between;
+
+    margin-bottom: 20px;
+
+}
+
+
+.calendar-title {
+
+    display: flex;
+
+    align-items: center;
+
+    gap: 10px;
+
+}
+
+
+.calendar-title select {
+
+    border: none;
+
+    background: transparent;
+
+    font-size: 28px;
+
+    font-weight: bold;
+
+    color: #222;
+
+    cursor: pointer;
+
+    outline: none;
+
+}
+
+
+.calendar-nav {
+
+    width: 42px;
+
+    height: 42px;
+
+    border: none;
+
+    border-radius: 50%;
+
+    background: #f0efff;
+
+    color: #6c63ff;
+
+    cursor: pointer;
+
+    transition: 0.3s;
+
+}
+
+
+.calendar-nav:hover {
+
+    background: #6c63ff;
+
+    color: white;
+
+}
+
+
+
+/* =========================================================
+   CALENDAR GRID
+========================================================= */
+
+.calendar {
+
+    width: 100%;
+
+    border: 1px solid #d5d5d5;
+
+}
+
+
+
+/* WEEK DAYS */
+
+.calendar-weekdays {
+
+    display: grid;
+
+    grid-template-columns:
+        repeat(7, 1fr);
+
+    background: #f5f5f5;
+
+    border-bottom: 1px solid #bdbdbd;
+
+}
+
+
+.calendar-weekdays div {
+
+    text-align: center;
+
+    padding: 10px 5px;
+
+    font-size: 11px;
+
+    font-weight: bold;
+
+    border-right: 1px solid #d0d0d0;
+
+}
+
+
+.calendar-weekdays div:last-child {
+
+    border-right: none;
+
+}
+
+
+
+/* DAYS */
+
+.calendar-days {
+
+    display: grid;
+
+    grid-template-columns:
+        repeat(7, 1fr);
+
+}
+
+
+
+/* INDIVIDUAL DAY */
+
+.calendar-day {
+
+    min-height: 105px;
+
+    border-right: 1px solid #bdbdbd;
+
+    border-bottom: 1px solid #bdbdbd;
+
+    padding: 7px;
+
+    cursor: pointer;
+
+    position: relative;
+
+    background: white;
+
+    transition: background 0.2s;
+
+}
+
+
+.calendar-day:hover {
+
+    background: #f8f7ff;
+
+}
+
+
+.calendar-day:nth-child(7n) {
+
+    border-right: none;
+
+}
+
+
+
+/* DAY NUMBER */
+
+.day-number {
+
+    font-size: 13px;
+
+    color: #333;
+
+    display: inline-block;
+
+    margin-bottom: 5px;
+
+}
+
+
+
+/* OTHER MONTH */
+
+.calendar-day.other-month {
+
+    background: #fafafa;
+
+    color: #aaa;
+
+    cursor: default;
+
+}
+
+
+.calendar-day.other-month .day-number {
+
+    color: #aaa;
+
+}
+
+
+
+/* TODAY */
+
+.calendar-day.today {
+
+    background: #f0efff;
+
+}
+
+
+.calendar-day.today
+.day-number {
+
+    background: #6c63ff;
+
+    color: white;
+
+    width: 25px;
+
+    height: 25px;
+
+    display: flex;
+
+    align-items: center;
+
+    justify-content: center;
+
+    border-radius: 50%;
+
+    font-weight: bold;
+
+}
+
+
+
+/* SELECTED DATE */
+
+.calendar-day.selected-date {
+
+    outline: 3px solid #6c63ff;
+
+    outline-offset: -3px;
+
+}
+
+
+
+/* =========================================================
+   EVENTS
+========================================================= */
+
+.day-events {
+
+    display: flex;
+
+    flex-direction: column;
+
+    gap: 4px;
+
+}
+
+
+.calendar-event {
+
+    font-size: 10px;
+
+    padding: 4px 5px;
+
+    border-radius: 4px;
+
+    overflow: hidden;
+
+    text-overflow: ellipsis;
+
+    white-space: nowrap;
+
+}
+
+
+.revision-event {
+
+    background: #e9e7ff;
+
+    color: #574fd6;
+
+}
+
+
+.exam-event {
+
+    background: #ffe5e5;
+
+    color: #c0392b;
+
+}
+
+
+.calendar-event i {
+
+    margin-right: 3px;
+
+}
+
+
+
+/* =========================================================
+   EVENT PANEL
+========================================================= */
+
+.calendar-event-panel {
+
+    margin-top: 25px;
+
+    padding: 25px;
+
+    background: #f8f8fc;
+
+    border-radius: 12px;
+
+    display: none;
+
+}
+
+
+.calendar-event-panel.show {
+
+    display: block;
+
+}
+
+
+.calendar-event-panel h2 {
+
+    margin-bottom: 5px;
+
+}
+
+
+.calendar-event-panel p {
+
+    color: #777;
+
+    margin-bottom: 20px;
+
+}
+
+
+
+/* =========================================================
+   FORM
+========================================================= */
+
+.calendar-form {
+
+    display: grid;
+
+    grid-template-columns:
+        repeat(2, 1fr);
+
+    gap: 15px;
+
+}
+
+
+.calendar-form label {
+
+    font-weight: 600;
+
+    font-size: 14px;
+
+}
+
+
+.calendar-form input,
+.calendar-form select {
+
+    width: 100%;
+
+    padding: 12px;
+
+    border: 1px solid #ddd;
+
+    border-radius: 8px;
+
+    background: white;
+
+    outline: none;
+
+}
+
+
+.calendar-form input:focus,
+.calendar-form select:focus {
+
+    border-color: #6c63ff;
+
+}
+
+
+.calendar-save-btn {
+
+    grid-column: span 2;
+
+    padding: 13px;
+
+    border: none;
+
+    border-radius: 8px;
+
+    background: #6c63ff;
+
+    color: white;
+
+    font-weight: bold;
+
+    cursor: pointer;
+
+    transition: 0.3s;
+
+}
+
+
+.calendar-save-btn:hover {
+
+    background: #574fd6;
+
+}
+
+
+
+/* =========================================================
+   LEGEND
+========================================================= */
+
+.calendar-legend {
+
+    display: flex;
+
+    gap: 25px;
+
+    margin-top: 20px;
+
+    font-size: 13px;
+
+    color: #666;
+
+}
+
+
+.calendar-legend div {
+
+    display: flex;
+
+    align-items: center;
+
+    gap: 7px;
+
+}
+
+
+.legend-box {
+
+    width: 15px;
+
+    height: 15px;
+
+    border-radius: 4px;
+
+    display: inline-block;
+
+}
+
+
+.revision-color {
+
+    background: #e9e7ff;
+
+}
+
+
+.exam-color {
+
+    background: #ffe5e5;
+
+}
+
+
+
+/* =========================================================
+   MOBILE
+========================================================= */
+
+@media (max-width: 700px) {
+
+    .calendar-wrapper {
+
+        padding: 10px;
+
+    }
+
+
+    .calendar-title select {
+
+        font-size: 18px;
+
+    }
+
+
+    .calendar-day {
+
+        min-height: 75px;
+
+        padding: 4px;
+
+    }
+
+
+    .calendar-weekdays div {
+
+        font-size: 8px;
+
+        padding: 8px 2px;
+
+    }
+
+
+    .calendar-event {
+
+        font-size: 8px;
+
+    }
+
+
+    .calendar-form {
+
+        grid-template-columns: 1fr;
+
+    }
+
+
+    .calendar-save-btn {
+
+        grid-column: span 1;
+
+    }
+
+}

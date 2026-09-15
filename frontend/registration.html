@@ -1,0 +1,472 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Reebus — Login</title>
+<style>
+  :root{
+    --bg-page:#e7ecfb;
+    --panel:#ffffff;
+    --ink:#1c2b4a;
+    --ink-soft:#7a86a6;
+    --blue-900:#1a2b6b;
+    --blue-700:#2b46c9;
+    --blue-500:#4a63e0;
+    --blue-300:#a9b8f4;
+    --blue-200:#c9d3f8;
+    --blue-100:#e3e8fc;
+    --blob:#c7d2f7;
+    --line:#e1e6f7;
+    --radius:22px;
+  }
+
+  *{box-sizing:border-box;}
+
+  body{
+    margin:0;
+    min-height:100vh;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    background:
+      radial-gradient(circle at 12% 10%, #dde4fb 0%, transparent 45%),
+      var(--bg-page);
+    font-family:'Segoe UI', -apple-system, BlinkMacSystemFont, sans-serif;
+    color:var(--ink);
+    padding:24px;
+  }
+
+  .card{
+    position:relative;
+    width:min(980px, 100%);
+    background:var(--panel);
+    border:2px solid var(--blue-900);
+    border-radius:var(--radius);
+    display:grid;
+    grid-template-columns: 1fr 1.15fr;
+    overflow:hidden;
+    box-shadow: 0 30px 60px -25px rgba(26,43,107,0.35);
+  }
+
+  /* ---------- LEFT: form ---------- */
+  .form-side{
+    padding:38px 42px 42px;
+    display:flex;
+    flex-direction:column;
+    justify-content:center;
+    position:relative;
+    z-index:2;
+  }
+
+  .brand{
+    position:absolute;
+    top:22px;
+    left:32px;
+    font-size:11px;
+    font-weight:700;
+    letter-spacing:2px;
+    color:var(--blue-900);
+  }
+
+  h1{
+    font-size:34px;
+    margin:26px 0 6px;
+    color:var(--blue-900);
+    font-weight:700;
+  }
+
+  .subtitle{
+    font-size:13px;
+    color:var(--ink-soft);
+    margin:0 0 30px;
+    line-height:1.5;
+    max-width:280px;
+  }
+
+  label{
+    display:block;
+    font-size:12.5px;
+    font-weight:600;
+    color:var(--blue-900);
+    margin-bottom:6px;
+  }
+
+  .field{
+    margin-bottom:18px;
+  }
+
+  input{
+    width:100%;
+    border:none;
+    border-bottom:1.5px solid var(--blue-200);
+    background:transparent;
+    padding:6px 2px 10px;
+    font-size:14px;
+    color:var(--ink);
+    outline:none;
+    transition:border-color .2s ease;
+  }
+
+  input::placeholder{ color:#b7c0e0; }
+  input:focus{ border-bottom-color:var(--blue-500); }
+
+  .row-between{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    margin:2px 0 26px;
+    font-size:12px;
+  }
+
+  .row-between a{
+    color:var(--blue-500);
+    text-decoration:none;
+  }
+
+  .remember{
+    display:flex;
+    align-items:center;
+    gap:6px;
+    color:var(--ink-soft);
+  }
+
+  button.login-btn{
+    background:var(--blue-700);
+    color:#fff;
+    border:none;
+    padding:13px 0;
+    width:150px;
+    border-radius:8px;
+    font-size:13px;
+    font-weight:700;
+    letter-spacing:.5px;
+    cursor:pointer;
+    box-shadow:0 12px 20px -8px rgba(43,70,201,0.55);
+    transition:transform .15s ease, box-shadow .15s ease, background .15s ease;
+  }
+
+  button.login-btn:hover{
+    background:var(--blue-500);
+    transform:translateY(-2px);
+    box-shadow:0 16px 24px -8px rgba(43,70,201,0.6);
+  }
+
+  button.login-btn:active{ transform:translateY(0); }
+
+  .error{
+    color:#d1495b;
+    font-size:11.5px;
+    height:14px;
+    margin-top:-14px;
+    margin-bottom:14px;
+  }
+
+  /* ---------- RIGHT: illustration ---------- */
+  .art-side{
+    position:relative;
+    background:linear-gradient(180deg,#eef2fd, #dfe6fb);
+    overflow:hidden;
+  }
+
+  .blob{
+    position:absolute;
+    top:-10%;
+    right:-18%;
+    width:120%;
+    height:120%;
+    background:var(--blob);
+    opacity:.55;
+    border-radius:42% 58% 65% 35% / 45% 40% 60% 55%;
+    animation: blobMove 14s ease-in-out infinite;
+  }
+
+  @keyframes blobMove{
+    0%,100%{ border-radius:42% 58% 65% 35% / 45% 40% 60% 55%; }
+    50%{ border-radius:60% 40% 40% 60% / 55% 60% 40% 45%; }
+  }
+
+  .dot{
+    position:absolute;
+    border-radius:50%;
+  }
+  .dot.d1{ width:26px; height:26px; background:var(--blue-300); top:14%; left:20%; opacity:.8;}
+  .dot.d2{ width:14px; height:14px; background:var(--blue-500); top:34%; left:8%; opacity:.7;}
+  .dot.d3{ width:34px; height:34px; background:var(--blue-200); bottom:8%; right:12%; opacity:.6;}
+
+  .swoosh{
+    position:absolute;
+    top:8%;
+    left:6%;
+    width:70px;
+    opacity:.9;
+  }
+
+  .scene{
+    position:relative;
+    height:100%;
+    display:flex;
+    align-items:flex-end;
+    justify-content:center;
+    padding:30px 20px 0;
+    z-index:1;
+  }
+
+  .dashboard{
+    position:relative;
+    z-index:2;
+    width:74%;
+    background:#fbfcff;
+    border:1.5px solid var(--blue-900);
+    border-radius:14px;
+    padding:16px 16px 10px;
+    box-shadow:0 20px 40px -20px rgba(26,43,107,.4);
+    margin-bottom:26px;
+  }
+
+  .dashboard .side-dots{
+    position:absolute;
+    top:10px;
+    right:-9px;
+    width:18px;
+    background:#fff;
+    border:1.5px solid var(--blue-900);
+    border-radius:9px;
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    gap:8px;
+    padding:8px 0;
+  }
+  .dashboard .side-dots span{
+    width:5px;height:5px;border-radius:50%;background:var(--blue-300);
+  }
+
+  .db-row{ display:flex; gap:14px; }
+  .db-left{ flex:1; }
+  .bar{
+    height:6px;
+    border-radius:4px;
+    background:var(--blue-200);
+    margin-bottom:8px;
+  }
+  .bar.w1{width:90%;} .bar.w2{width:60%;background:var(--blue-500);}
+  .bar.w3{width:75%;} .bar.w4{width:40%;background:var(--blue-300);}
+
+  .pie{
+    width:78px;height:78px;border-radius:50%;
+    background:conic-gradient(var(--blue-700) 0 40%, var(--blue-300) 40% 70%, var(--blue-100) 70% 100%);
+    flex-shrink:0;
+    box-shadow: inset 0 0 0 6px #fbfcff;
+  }
+
+  .db-right{ display:flex; flex-direction:column; gap:8px; width:70px; }
+  .chip{ height:8px; border-radius:4px; background:var(--blue-100); }
+  .chip.b{ background:var(--blue-500); width:60%; }
+
+  .db-footer{
+    margin-top:12px;
+    border-top:1px dashed var(--line);
+    padding-top:10px;
+    display:flex;
+    gap:6px;
+  }
+  .db-footer .fbar{
+    flex:1;
+    background:var(--blue-100);
+    border-radius:3px 3px 0 0;
+  }
+  .fbar:nth-child(1){height:14px;}
+  .fbar:nth-child(2){height:24px;background:var(--blue-300);}
+  .fbar:nth-child(3){height:18px;}
+  .fbar:nth-child(4){height:30px;background:var(--blue-500);}
+  .fbar:nth-child(5){height:10px;}
+
+  .mini-chart{
+    position:absolute;
+    left:2%;
+    bottom:16%;
+    width:74px;
+    background:#fbfcff;
+    border:1.5px solid var(--blue-900);
+    border-radius:10px;
+    padding:8px;
+    z-index:3;
+    box-shadow:0 14px 26px -16px rgba(26,43,107,.4);
+  }
+  .mini-chart .mbar{
+    display:inline-block;
+    width:8px;
+    margin-right:3px;
+    background:var(--blue-500);
+    border-radius:2px 2px 0 0;
+    vertical-align:bottom;
+  }
+
+  .person{
+    position:absolute;
+    bottom:0;
+    z-index:2;
+  }
+  .person.left{ left:6%; width:80px; }
+  .person.right{ right:8%; width:78px; }
+
+  .ground-line{
+    position:absolute;
+    bottom:0;
+    left:5%;
+    right:5%;
+    height:1px;
+    background:var(--blue-900);
+    opacity:.25;
+    z-index:1;
+  }
+
+  @media (max-width: 760px){
+    .card{ grid-template-columns:1fr; }
+    .art-side{ order:-1; height:260px; }
+    .form-side{ padding:34px 28px; }
+    .brand{ top:14px; left:20px; }
+  }
+
+  @media (prefers-reduced-motion: reduce){
+    .blob{ animation:none; }
+  }
+</style>
+</head>
+<body>
+
+<div class="card">
+
+  <div class="form-side">
+    <div class="brand">REEBUS</div>
+    <h1>Registration</h1>
+    <p class="subtitle">Welcome back to your background management system.</p>
+
+    <form id="loginForm" novalidate>
+      <div class="field">
+        <label for="email">Email</label>
+        <input type="email" id="email" placeholder="[email protected]" required>
+      </div>
+      <div class="field">
+        <label for="password">Password</label>
+        <input type="password" id="password" placeholder="Enter your password" required>
+      </div>
+
+      <div class="error" id="formError"></div>
+
+      <div class="row-between">
+        <label class="remember"><input type="checkbox" style="width:auto;"> Remember me</label>
+        <a href="#">Forgot password?</a>
+      </div>
+
+      <button type="submit" class="login-btn">LOGIN</button>
+    </form>
+  </div>
+
+  <div class="art-side">
+    <div class="blob"></div>
+    <div class="dot d1"></div>
+    <div class="dot d2"></div>
+    <div class="dot d3"></div>
+
+    <svg class="swoosh" viewBox="0 0 100 60" fill="none">
+      <path d="M4 40 C 20 4, 60 4, 96 26" stroke="#4a63e0" stroke-width="6" stroke-linecap="round"/>
+    </svg>
+
+    <div class="scene">
+      <div class="ground-line"></div>
+
+      <svg class="person left" viewBox="0 0 80 200" fill="none">
+        <circle cx="40" cy="26" r="16" fill="#2b2f4a"/>
+        <rect x="24" y="42" width="32" height="70" rx="14" fill="#4a63e0"/>
+        <rect x="18" y="112" width="18" height="70" rx="8" fill="#1c2b4a"/>
+        <rect x="44" y="112" width="18" height="70" rx="8" fill="#1c2b4a"/>
+        <rect x="10" y="60" width="18" height="46" rx="8" fill="#2b2f4a"/>
+      </svg>
+
+      <div class="mini-chart" style="bottom:26%;">
+        <div style="height:44px;">
+          <span class="mbar" style="height:16px;"></span>
+          <span class="mbar" style="height:30px;"></span>
+          <span class="mbar" style="height:22px;"></span>
+          <span class="mbar" style="height:38px;"></span>
+        </div>
+      </div>
+
+      <div class="dashboard">
+        <div class="side-dots">
+          <span></span><span></span><span></span><span></span><span></span>
+        </div>
+        <div class="db-row">
+          <div class="db-left">
+            <div class="bar w1"></div>
+            <div class="bar w2"></div>
+            <div class="bar w3"></div>
+            <div class="bar w4"></div>
+          </div>
+          <div class="pie"></div>
+          <div class="db-right">
+            <div class="chip"></div>
+            <div class="chip b"></div>
+            <div class="chip"></div>
+          </div>
+        </div>
+        <div class="db-footer">
+          <div class="fbar"></div>
+          <div class="fbar"></div>
+          <div class="fbar"></div>
+          <div class="fbar"></div>
+          <div class="fbar"></div>
+        </div>
+      </div>
+
+      <svg class="person right" viewBox="0 0 80 200" fill="none">
+        <circle cx="40" cy="26" r="16" fill="#2b2f4a"/>
+        <rect x="24" y="42" width="32" height="72" rx="14" fill="#1c2b4a"/>
+        <rect x="18" y="114" width="18" height="68" rx="8" fill="#2b2f4a"/>
+        <rect x="44" y="114" width="18" height="68" rx="8" fill="#2b2f4a"/>
+        <rect x="52" y="55" width="20" height="46" rx="8" fill="#4a63e0"/>
+      </svg>
+    </div>
+  </div>
+
+</div>
+
+<script>
+  const form = document.getElementById('loginForm');
+  const errorBox = document.getElementById('formError');
+
+  form.addEventListener('submit', function(e){
+    e.preventDefault();
+    const email = document.getElementById('email').value.trim();
+    const password = document.getElementById('password').value;
+
+    if(!email || !password){
+      errorBox.textContent = 'Please fill in both fields.';
+      return;
+    }
+    const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if(!emailPattern.test(email)){
+      errorBox.textContent = 'Enter a valid email address.';
+      return;
+    }
+
+    errorBox.textContent = '';
+    const btn = form.querySelector('.login-btn');
+    const original = btn.textContent;
+    btn.textContent = 'LOGGING IN...';
+    btn.disabled = true;
+
+    setTimeout(() => {
+      btn.textContent = 'LOGGED IN ✓';
+      setTimeout(() => {
+        btn.textContent = original;
+        btn.disabled = false;
+      }, 1400);
+    }, 900);
+  });
+</script>
+
+</body>
+</html>

@@ -1,0 +1,24 @@
+# Python artifacts and environments
+__pycache__/
+*.py[cod]
+venv/
+.venv/
+env/
+ENV/
+
+# Local configuration and databases
+.env
+.env.*
+!.env.example
+*.db
+*.sqlite
+*.sqlite3
+
+# IDE and operating-system files
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+
+# Preserve nested repository metadata outside the published tree
+.git.nested-backup/

@@ -1,0 +1,751 @@
+/* =========================================
+   RESET
+========================================= */
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+
+html,
+body {
+    width: 100%;
+    min-height: 100%;
+}
+
+
+body {
+    font-family: Arial, Helvetica, sans-serif;
+
+    /*
+       Soft pastel background similar
+       to the reference image.
+    */
+    background:
+        radial-gradient(
+            circle at 10% 85%,
+            rgba(255, 245, 235, 0.95) 0,
+            rgba(255, 245, 235, 0.5) 12%,
+            transparent 28%
+        ),
+
+        radial-gradient(
+            circle at 92% 62%,
+            rgba(255, 242, 232, 0.8) 0,
+            rgba(255, 242, 232, 0.35) 13%,
+            transparent 30%
+        ),
+
+        linear-gradient(
+            135deg,
+            #eef4ff 0%,
+            #e9f1ff 48%,
+            #f3f6ff 100%
+        );
+
+    overflow-x: hidden;
+}
+
+
+/* =========================================
+   BACKGROUND DECORATION
+========================================= */
+
+.background-shape {
+    position: fixed;
+    pointer-events: none;
+    z-index: 0;
+}
+
+
+.shape-one {
+    width: 350px;
+    height: 180px;
+
+    left: -100px;
+    bottom: -60px;
+
+    background: rgba(214, 229, 255, 0.65);
+
+    border-radius: 50%;
+
+    transform: rotate(-20deg);
+}
+
+
+.shape-two {
+    width: 300px;
+    height: 180px;
+
+    right: -110px;
+    top: 55%;
+
+    background: rgba(255, 241, 230, 0.65);
+
+    border-radius: 50%;
+
+    transform: rotate(25deg);
+}
+
+
+.shape-three {
+    width: 400px;
+    height: 180px;
+
+    left: 35%;
+    bottom: -120px;
+
+    background: rgba(215, 230, 255, 0.55);
+
+    border-radius: 50%;
+
+    transform: rotate(-15deg);
+}
+
+
+/* =========================================
+   DOTS
+========================================= */
+
+.dots {
+    position: fixed;
+
+    display: grid;
+
+    grid-template-columns: repeat(2, 7px);
+
+    gap: 9px;
+
+    z-index: 0;
+
+    opacity: 0.45;
+}
+
+
+.dots span {
+    width: 6px;
+    height: 6px;
+
+    background: #8faed8;
+
+    border-radius: 50%;
+}
+
+
+.dots-left {
+    left: 35px;
+    bottom: 90px;
+}
+
+
+.dots-right {
+    right: 35px;
+    bottom: 45px;
+}
+
+
+/* =========================================
+   PAGE
+========================================= */
+
+.page {
+    position: relative;
+
+    z-index: 1;
+
+    min-height: 100vh;
+
+    display: flex;
+
+    justify-content: center;
+
+    align-items: center;
+
+    padding: 35px 20px;
+}
+
+
+/* =========================================
+   SIGNUP CARD
+========================================= */
+
+.signup-card {
+
+    /*
+       Smaller than the previous version.
+       This gives it approximately the
+       proportions shown in your reference.
+    */
+
+    width: min(850px, 92vw);
+
+    min-height: 520px;
+
+    background: rgba(255, 255, 255, 0.97);
+
+    border-radius: 18px;
+
+    display: grid;
+
+    grid-template-columns: 1fr 0.82fr;
+
+    align-items: center;
+
+    padding: 48px 55px;
+
+    box-shadow:
+        0 20px 45px rgba(70, 92, 130, 0.12),
+        0 5px 15px rgba(70, 92, 130, 0.06);
+
+    position: relative;
+
+    overflow: hidden;
+}
+
+
+/* =========================================
+   ILLUSTRATION
+========================================= */
+
+.illustration-container {
+
+    display: flex;
+
+    justify-content: center;
+
+    align-items: center;
+
+    height: 100%;
+
+    padding-right: 15px;
+}
+
+
+.illustration {
+
+    /*
+       This controls the size of the new
+       illustration.
+
+       Increase to 330px if you want it bigger.
+    */
+
+    width: 300px;
+
+    max-width: 100%;
+
+    height: auto;
+
+    display: block;
+
+    object-fit: contain;
+}
+
+
+/* =========================================
+   FORM CONTAINER
+========================================= */
+
+.form-container {
+
+    width: 100%;
+
+    max-width: 330px;
+
+    margin-left: auto;
+}
+
+
+.form-container h1 {
+
+    font-size: 39px;
+
+    font-weight: 700;
+
+    color: #111;
+
+    margin-bottom: 42px;
+}
+
+
+/* =========================================
+   INPUTS
+========================================= */
+
+.input-group {
+
+    height: 48px;
+
+    width: 100%;
+
+    display: flex;
+
+    align-items: center;
+
+    border-bottom: 1px solid #d1d1d1;
+
+    margin-bottom: 25px;
+
+    position: relative;
+
+    color: #222;
+}
+
+
+.input-group > i {
+
+    width: 28px;
+
+    font-size: 15px;
+
+    color: #222;
+}
+
+
+.input-group input {
+
+    flex: 1;
+
+    height: 100%;
+
+    border: none;
+
+    outline: none;
+
+    background: transparent;
+
+    font-size: 14px;
+
+    color: #333;
+
+    padding: 0 5px;
+}
+
+
+.input-group input::placeholder {
+
+    color: #a7a7a7;
+
+    font-size: 14px;
+}
+
+
+.input-icon {
+
+    color: #888;
+
+    font-size: 14px;
+}
+
+
+.eye-button {
+
+    border: none;
+
+    background: transparent;
+
+    color: #888;
+
+    cursor: pointer;
+
+    font-size: 13px;
+
+    padding: 5px;
+}
+
+
+.eye-button:hover {
+
+    color: #555;
+}
+
+
+/* =========================================
+   REMEMBER ME
+========================================= */
+
+.remember-me {
+
+    display: flex;
+
+    align-items: center;
+
+    gap: 10px;
+
+    margin-top: 4px;
+
+    margin-bottom: 27px;
+
+    color: #333;
+
+    font-size: 13px;
+
+    cursor: pointer;
+}
+
+
+.remember-me input {
+
+    appearance: none;
+
+    width: 18px;
+
+    height: 18px;
+
+    border: 1px solid #bdbdbd;
+
+    border-radius: 2px;
+
+    background: white;
+
+    cursor: pointer;
+
+    position: relative;
+}
+
+
+.remember-me input:checked {
+
+    background: #4f9de4;
+
+    border-color: #4f9de4;
+}
+
+
+.remember-me input:checked::after {
+
+    content: "✓";
+
+    color: white;
+
+    position: absolute;
+
+    font-size: 12px;
+
+    left: 3px;
+
+    top: 0;
+}
+
+
+/* =========================================
+   LOGIN BUTTON
+========================================= */
+
+.login-button {
+
+    width: 105px;
+
+    height: 48px;
+
+    border: none;
+
+    border-radius: 5px;
+
+    background: #4d9ce5;
+
+    color: white;
+
+    font-size: 14px;
+
+    cursor: pointer;
+
+    transition:
+        transform 0.2s ease,
+        background 0.2s ease,
+        box-shadow 0.2s ease;
+}
+
+
+.login-button:hover {
+
+    background: #388ddc;
+
+    transform: translateY(-2px);
+
+    box-shadow:
+        0 7px 15px rgba(77, 156, 229, 0.25);
+}
+
+
+.login-button:active {
+
+    transform: translateY(0);
+}
+
+
+/* =========================================
+   BOTTOM SECTION
+========================================= */
+
+.bottom-section {
+
+    display: flex;
+
+    align-items: center;
+
+    justify-content: space-between;
+
+    gap: 25px;
+
+    margin-top: 110px;
+}
+
+
+/* Create account */
+
+.bottom-section > a {
+
+    color: #333;
+
+    font-size: 13px;
+
+    text-decoration: underline;
+
+    white-space: nowrap;
+}
+
+
+.bottom-section > a:hover {
+
+    color: #4d9ce5;
+}
+
+
+/* =========================================
+   SOCIAL LOGIN
+========================================= */
+
+.social-login {
+
+    display: flex;
+
+    align-items: center;
+
+    gap: 12px;
+
+    white-space: nowrap;
+}
+
+
+.social-login > span {
+
+    color: #333;
+
+    font-size: 13px;
+}
+
+
+.social-buttons {
+
+    display: flex;
+
+    gap: 7px;
+}
+
+
+.social-buttons button {
+
+    width: 30px;
+
+    height: 30px;
+
+    border: none;
+
+    border-radius: 4px;
+
+    color: white;
+
+    cursor: pointer;
+
+    display: flex;
+
+    justify-content: center;
+
+    align-items: center;
+
+    transition:
+        transform 0.2s ease,
+        opacity 0.2s ease;
+}
+
+
+.social-buttons button:hover {
+
+    transform: translateY(-2px);
+
+    opacity: 0.9;
+}
+
+
+.facebook {
+
+    background: #315ca8;
+}
+
+
+.twitter {
+
+    background: #29a9e8;
+}
+
+
+.google {
+
+    background: #df3d35;
+}
+
+
+/* =========================================
+   TABLET
+========================================= */
+
+@media (max-width: 900px) {
+
+    .signup-card {
+
+        width: min(760px, 94vw);
+
+        padding: 40px;
+
+        grid-template-columns: 1fr 0.9fr;
+    }
+
+
+    .illustration {
+
+        width: 260px;
+    }
+
+
+    .form-container h1 {
+
+        font-size: 34px;
+
+        margin-bottom: 32px;
+    }
+
+
+    .bottom-section {
+
+        margin-top: 75px;
+
+        flex-direction: column;
+
+        align-items: flex-start;
+
+        gap: 18px;
+    }
+}
+
+
+/* =========================================
+   MOBILE
+========================================= */
+
+@media (max-width: 650px) {
+
+    .page {
+
+        padding: 25px 15px;
+    }
+
+
+    .signup-card {
+
+        width: 100%;
+
+        min-height: auto;
+
+        grid-template-columns: 1fr;
+
+        padding: 35px 28px;
+
+        gap: 20px;
+    }
+
+
+    .illustration-container {
+
+        height: 210px;
+
+        padding: 0;
+    }
+
+
+    .illustration {
+
+        width: 230px;
+    }
+
+
+    .form-container {
+
+        max-width: 100%;
+    }
+
+
+    .form-container h1 {
+
+        text-align: center;
+
+        font-size: 32px;
+
+        margin-bottom: 30px;
+    }
+
+
+    .bottom-section {
+
+        margin-top: 45px;
+
+        align-items: center;
+    }
+
+
+    .social-login {
+
+        flex-wrap: wrap;
+
+        justify-content: center;
+    }
+}
+
+
+/* =========================================
+   SMALL MOBILE
+========================================= */
+
+@media (max-width: 400px) {
+
+    .signup-card {
+
+        padding: 28px 20px;
+    }
+
+
+    .illustration-container {
+
+        height: 180px;
+    }
+
+
+    .illustration {
+
+        width: 200px;
+    }
+
+
+    .bottom-section {
+
+        font-size: 12px;
+    }
+
+
+    .social-login > span {
+
+        font-size: 12px;
+    }
+}
