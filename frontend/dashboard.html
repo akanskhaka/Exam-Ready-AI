@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Student Dashboard</title>
+
+    <!-- Font Awesome -->
+    <link rel="stylesheet"
+          href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+
+    <!-- Your existing CSS -->
+    <link rel="stylesheet" href="navstyle.css">
+</head>
+
+<body>
+
+    <!-- ================= SIDEBAR ================= -->
+    <aside class="sidebar">
+
+        <div class="logo">
+            <h2>ExamReady<span>AI</span></h2>
+        </div>
+
+        <div class="menu-title">
+            <p>MENU</p>
+        </div>
+
+        <ul class="menu">
+
+            <li>
+                <a href="#" class="menu-link active" data-page="dashboard">
+                    <i class="fa-solid fa-house"></i>
+                    <span>Dashboard</span>
+                </a>
+            </li>
+
+            <li>
+                <a href="#" class="menu-link" data-page="subjects">
+                    <i class="fa-solid fa-book-open"></i>
+                    <span>Subjects</span>
+                </a>
+            </li>
+
+            <li>
+                <a href="#" class="menu-link" data-page="reports">
+                    <i class="fa-solid fa-chart-line"></i>
+                    <span>Reports</span>
+                </a>
+            </li>
+
+            <li>
+                <a href="#" class="menu-link" data-page="quiz">
+                    <i class="fa-solid fa-circle-question"></i>
+                    <span>Quiz</span>
+                </a>
+            </li>
+
+            <li>
+                <a href="#" class="menu-link" data-page="schedule">
+                    <i class="fa-solid fa-calendar-days"></i>
+                    <span>Schedule</span>
+                </a>
+            </li>
+
+            <li>
+                <a href="#" class="menu-link" data-page="calendar">
+                    <i class="fa-solid fa-calendar"></i>
+                    <span>Calendar</span>
+                </a>
+            </li>
+
+            <li>
+                <a href="#" class="menu-link" data-page="ai">
+                    <i class="fa-solid fa-robot"></i>
+                    <span>AI Assistant</span>
+                </a>
+            </li>
+
+            <li>
+                <a href="#" class="menu-link" data-page="timer">
+                    <i class="fa-solid fa-stopwatch"></i>
+                    <span>Study Timer</span>
+                </a>
+            </li>
+
+            <li>
+                <a href="#" class="menu-link" data-page="profile">
+                    <i class="fa-solid fa-user"></i>
+                    <span>Profile</span>
+                </a>
+            </li>
+
+            <li>
+                <a href="#" class="menu-link" data-page="logout">
+                    <i class="fa-solid fa-right-from-bracket"></i>
+                    <span>Logout</span>
+                </a>
+            </li>
+
+        </ul>
+    </aside>
+
+    <!-- ================= MAIN CONTENT ================= -->
+    <main class="main-content">
+
+        <!-- TOP BAR -->
+        <header class="topbar">
+
+            <div>
+                <h1 id="page-title">Dashboard</h1>
+                <p id="page-description">
+                    Start adding your subjects and study information.
+                </p>
+            </div>
+
+            <div class="profile">
+                <i class="fa-solid fa-circle-user"></i>
+                <span id="topbar-name">Student</span>
+            </div>
+
+            <img id="calendar-cat-sticker"
+                 class="calendar-cat-sticker"
+                 src="Black%20Cat%20Sticker.jpeg"
+                 alt="Black cat sticker for the calendar"
+                 hidden>
+
+        </header>
+
+        <!-- BACK BUTTON (hidden on the Dashboard) -->
+        <button id="backToDashboard"
+                class="save-btn"
+                type="button"
+                style="display:none; margin-bottom:15px;">
+            <i class="fa-solid fa-arrow-left"></i>
+            Back to Dashboard
+        </button>
+
+        <!-- CONTENT AREA -->
+        <section id="content-area"></section>
+
+    </main>
+
+    <!-- JAVASCRIPT -->
+    <script src="navscript.js"></script>
+
+</body>
+</html>

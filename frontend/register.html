@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Create Account | ExamReadyAI</title>
+
+    <link rel="stylesheet"
+          href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap"
+          rel="stylesheet">
+    <link rel="stylesheet" href="register.css">
+</head>
+
+<body>
+<main class="register-container">
+    <section class="register-form-section" aria-labelledby="registerHeading">
+        <div class="register-logo" aria-hidden="true"></div>
+        <h1 class="register-heading" id="registerHeading">Create Your Account</h1>
+        <p class="register-subtitle">Enter your details to get started.</p>
+
+        <form id="registerForm" class="register-form" novalidate>
+            <div class="form-group">
+                <label for="name">Full name</label>
+                <input type="text" id="name" name="name"
+                       placeholder="Enter your name" autocomplete="name" required>
+            </div>
+
+            <div class="form-group">
+                <label for="email">Email address</label>
+                <input type="email" id="email" name="email"
+                       placeholder="Enter your email" autocomplete="email" required>
+            </div>
+
+            <div class="form-group">
+                <label for="password">Password</label>
+                <div class="password-field">
+                    <input type="password" id="password" name="password"
+                           placeholder="At least 6 characters"
+                           autocomplete="new-password" minlength="6" required>
+                    <button type="button" id="togglePassword" class="password-toggle"
+                            aria-label="Show password">
+                        <i class="fa-regular fa-eye" aria-hidden="true"></i>
+                    </button>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label for="confirmPassword">Confirm password</label>
+                <input type="password" id="confirmPassword" name="confirmPassword"
+                       placeholder="Enter your password again"
+                       autocomplete="new-password" required>
+            </div>
+
+            <button type="submit" class="register-btn">Create Account</button>
+            <p id="statusMessage" class="register-status"
+               role="status" aria-live="polite"></p>
+        </form>
+
+        <p class="register-footer">
+            Already have an account? <a href="./login.html">Log in</a>
+        </p>
+    </section>
+
+    <aside class="register-info-section">
+        <div class="info-content">
+            <h2>Get started</h2>
+            <p>Create your account to keep your subjects, study sessions, and progress in one place.</p>
+            <div class="info-actions">
+                <a class="learn-more-btn" href="./login.html">Back to login</a>
+            </div>
+        </div>
+    </aside>
+</main>
+
+<script src="register.js"></script>
+</body>
+</html>

@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Student Dashboard | Exam-Ready AI</title>
+
+    <!-- Font Awesome -->
+    <link
+        rel="stylesheet"
+        href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css"
+    >
+
+    <!-- CSS -->
+    <link rel="stylesheet" href="navstyle.css">
+</head>
+
+<body>
+
+    <!-- ================= LEFT SIDEBAR ================= -->
+    <aside class="sidebar">
+
+        <!-- Logo -->
+        <div class="logo">
+            <h2>EXAM READY<span>AI</span></h2>
+        </div>
+
+        <!-- Menu Title -->
+        <div class="menu-title">
+            <p>MENU</p>
+        </div>
+
+        <!-- Navigation Menu -->
+        <ul class="menu">
+
+            <li>
+                <a href="#" class="menu-link active" data-page="dashboard">
+                    <i class="fa-solid fa-house"></i>
+                    <span>Dashboard</span>
+                </a>
+            </li>
+
+            <li>
+                <a href="#" class="menu-link" data-page="reports">
+                    <i class="fa-solid fa-chart-line"></i>
+                    <span>Reports</span>
+                </a>
+            </li>
+
+            <li>
+                <a href="#" class="menu-link" data-page="schedule">
+                    <i class="fa-solid fa-calendar-days"></i>
+                    <span>Schedule</span>
+                </a>
+            </li>
+
+            <li>
+                <a href="#" class="menu-link" data-page="calendar">
+                    <i class="fa-solid fa-calendar"></i>
+                    <span>Calendar</span>
+                </a>
+            </li>
+
+            <li>
+                <a href="#" class="menu-link" data-page="logout">
+                    <i class="fa-solid fa-right-from-bracket"></i>
+                    <span>Logout</span>
+                </a>
+            </li>
+
+        </ul>
+
+    </aside>
+
+
+    <!-- ================= MAIN CONTENT ================= -->
+    <main class="main-content">
+
+        <!-- Top Bar -->
+        <header class="topbar">
+
+            <div class="page-heading">
+                <h1 id="page-title">Dashboard</h1>
+
+                <p id="page-subtitle">
+                    Welcome back! Here's your exam readiness overview.
+                </p>
+            </div>
+
+            <!-- Profile -->
+            <div class="profile">
+                <i class="fa-solid fa-circle-user"></i>
+                <span>Student</span>
+            </div>
+
+        </header>
+
+
+        <!-- ================= CONTENT AREA ================= -->
+        <section id="content-area">
+
+            <!-- DASHBOARD PAGE -->
+            <div class="page dashboard-page">
+
+                <!-- Welcome Card -->
+                <div class="welcome-card">
+
+                    <div class="welcome-text">
+                        <h2>Welcome to your Dashboard </h2>
+
+                        <p>
+                            Track your syllabus, mock tests, study time,
+                            mistakes and exam readiness from one place.
+                        </p>
+                    </div>
+
+                </div>
+
+
+                <!-- Dashboard Cards -->
+                <div class="cards">
+
+                    <!-- Syllabus -->
+                    <div class="card">
+
+                        <div class="card-icon">
+                            <i class="fa-solid fa-book"></i>
+                        </div>
+
+                        <div class="card-content">
+                            <h3>Syllabus</h3>
+                            <p>75% Completed</p>
+                        </div>
+
+                    </div>
+
+
+                    <!-- Mock Tests -->
+                    <div class="card">
+
+                        <div class="card-icon">
+                            <i class="fa-solid fa-pen-to-square"></i>
+                        </div>
+
+                        <div class="card-content">
+                            <h3>Mock Tests</h3>
+                            <p>8 Tests Completed</p>
+                        </div>
+
+                    </div>
+
+
+                    <!-- Study Time -->
+                    <div class="card">
+
+                        <div class="card-icon">
+                            <i class="fa-solid fa-clock"></i>
+                        </div>
+
+                        <div class="card-content">
+                            <h3>Study Time</h3>
+                            <p>32 Hours</p>
+                        </div>
+
+                    </div>
+
+
+                    <!-- Readiness -->
+                    <div class="card">
+
+                        <div class="card-icon">
+                            <i class="fa-solid fa-bullseye"></i>
+                        </div>
+
+                        <div class="card-content">
+                            <h3>Readiness</h3>
+                            <p>82%</p>
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </section>
+
+    </main>
+
+
+    <!-- JavaScript -->
+        <!-- JAVASCRIPT -->
+
+    <script src="navscript.js"></script>
+    <script src="dashboard.js"></script>
+
+</body>
+</html>

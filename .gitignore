@@ -1,0 +1,38 @@
+# Python artifacts and environments
+__pycache__/
+*.py[cod]
+*$py.class
+venv/
+.venv/
+env/
+ENV/
+
+# Local configuration and databases
+.env
+.env.*
+!.env.example
+
+# Local databases
+*.db
+*.sqlite
+*.sqlite3
+
+# Test and coverage output
+.pytest_cache/
+.coverage
+htmlcov/
+
+# Packaging output
+.Python
+build/
+dist/
+*.egg-info/
+
+# IDE and operating-system files
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+
+# Preserve nested repository metadata outside the published tree
+.git.nested-backup/
