@@ -1,0 +1,205 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Welcome Back | Login</title>
+
+    <link rel="stylesheet"
+          href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap"
+          rel="stylesheet">
+
+    <link rel="stylesheet" href="login.css">
+</head>
+
+<body>
+
+<main class="login-wrapper">
+
+    <section class="login-card">
+
+        <!-- LEFT WELCOME SECTION -->
+        <div class="welcome-side">
+
+            <div class="wave-background"></div>
+            <div class="welcome-content">
+
+                <span class="eyebrow">WELCOME TO YOUR LEARNING SPACE</span>
+
+                <h1>Welcome</h1>
+
+                <p>
+                    Every day is a new opportunity to learn,
+                    grow, and get closer to your dreams.
+                </p>
+
+                <!-- Illustration created with CSS -->
+                <div class="study-art" aria-hidden="true">
+
+                    <div class="art-circle"></div>
+                    <div class="art-star">✦</div>
+
+                    <div class="art-laptop">
+                        <div class="art-screen">
+                            <span></span>
+                            <span></span>
+                            <span></span>
+                        </div>
+                        <div class="art-keyboard"></div>
+                    </div>
+
+                    <div class="art-person">
+                        <div class="person-hair"></div>
+                        <div class="person-head"></div>
+                        <div class="person-body"></div>
+                        <div class="person-arm"></div>
+                        <div class="person-leg left-leg"></div>
+                        <div class="person-leg right-leg"></div>
+                    </div>
+
+                    <div class="art-leaf">✳</div>
+
+                </div>
+
+                <div class="welcome-caption">
+                    <i class="fa-solid fa-sparkles"></i>
+                    Your journey continues here.
+                </div>
+
+            </div>
+        </div>
+
+
+        <!-- RIGHT LOGIN SECTION -->
+        <div class="form-side">
+
+            <div class="form-container">
+
+                <div class="form-heading">
+                    <span class="mini-label">YOUR SPACE AWAITS</span>
+                    <h2>Login</h2>
+
+                    <p>
+                        Ready to continue your learning journey?<br>
+                        Your path is right here.
+                    </p>
+                </div>
+
+                <form id="loginForm" novalidate>
+
+                    <div class="field">
+                        <label for="email">Email address</label>
+
+                        <div class="input-box">
+                            <i class="fa-regular fa-envelope"></i>
+
+                            <input
+                                type="email"
+                                id="email"
+                                placeholder="Enter your email"
+                                autocomplete="email"
+                                required
+                            >
+                        </div>
+
+                        <small class="error-message"></small>
+                    </div>
+
+                    <div class="field">
+                        <label for="password">Password</label>
+
+                        <div class="input-box">
+                            <i class="fa-solid fa-lock"></i>
+
+                            <input
+                                type="password"
+                                id="password"
+                                placeholder="Enter your password"
+                                autocomplete="current-password"
+                                required
+                            >
+
+                            <button
+                                type="button"
+                                id="togglePassword"
+                                class="eye-button"
+                                aria-label="Show password"
+                            >
+                                <i class="fa-regular fa-eye"></i>
+                            </button>
+                        </div>
+
+                        <small class="error-message"></small>
+                    </div>
+
+                    <div class="form-options">
+
+                        <label class="remember-option">
+                            <input type="checkbox" id="rememberMe">
+                            <span>Remember me</span>
+                        </label>
+
+                        <a href="#" id="forgotPassword">
+                            Forgot password?
+                        </a>
+
+                    </div>
+
+                    <button type="submit" class="login-button">
+                        <span>Log In</span>
+                        <i class="fa-solid fa-arrow-right"></i>
+                    </button>
+
+                    <p id="statusMessage" class="status-message"
+                       role="status" aria-live="polite"></p>
+
+                </form>
+
+                <div class="form-options">
+                    <span>New to ExamReadyAI?</span>
+                    <a href="./register.html">Create account</a>
+                </div>
+
+                <div class="divider">
+                    <span></span>
+                    <p>Or continue with</p>
+                    <span></span>
+                </div>
+
+                <div class="social-login">
+
+                    <button type="button" data-provider="Google">
+                        <span class="google-icon">G</span>
+                        Google
+                    </button>
+
+                    <button type="button" data-provider="Facebook">
+                        <i class="fa-brands fa-facebook facebook-icon"></i>
+                        Facebook
+                    </button>
+
+                    <button type="button" data-provider="Apple">
+                        <i class="fa-brands fa-apple apple-icon"></i>
+                        Apple
+                    </button>
+
+                </div>
+
+                
+
+            </div>
+        </div>
+
+    </section>
+
+</main>
+
+<script src="login.js"></script>
+</body>
+</html>
