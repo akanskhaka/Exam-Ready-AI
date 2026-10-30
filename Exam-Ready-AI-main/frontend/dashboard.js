@@ -1,25 +1,21 @@
 // dashboard.js
 
-const isLoggedIn =
-    sessionStorage.getItem("isLoggedIn");
-
-if (isLoggedIn !== "true") {
-    window.location.replace("login.html");
-}
-
 const userName =
     sessionStorage.getItem("userName");
 
-document.getElementById("userName").textContent =
-    userName || "User";
+const userNameElement = document.getElementById("userName");
+if (userNameElement) {
+    userNameElement.textContent = userName || "User";
+}
 
 
-document
-    .getElementById("logoutBtn")
-    .addEventListener("click", function () {
+const logoutButton = document.getElementById("logoutBtn");
+if (logoutButton) {
+    logoutButton.addEventListener("click", function () {
 
         sessionStorage.removeItem("isLoggedIn");
         sessionStorage.removeItem("userName");
 
-        window.location.replace("login.html");
+        window.location.replace("./dashboard.html");
     });
+}

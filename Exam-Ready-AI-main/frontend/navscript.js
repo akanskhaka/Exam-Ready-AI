@@ -35,11 +35,6 @@ const backButton = document.getElementById("backToDashboard");
 const topbarName = document.getElementById("topbar-name");
 const calendarCatSticker = document.getElementById("calendar-cat-sticker");
 
-if (sessionStorage.getItem("isLoggedIn") !== "true") {
-    window.location.replace("./login.html");
-}
-
-
 /* =========================================================
    HELPERS
 ========================================================= */
@@ -1674,7 +1669,7 @@ function openLogout() {
     document.getElementById("confirmLogout").addEventListener("click", function () {
         sessionStorage.removeItem("isLoggedIn");
         sessionStorage.removeItem("userName");
-        window.location.replace("login.html");
+        window.location.replace("./dashboard.html");
     });
 
     document.getElementById("cancelLogout").addEventListener("click", function () {
