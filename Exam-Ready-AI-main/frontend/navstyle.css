@@ -128,11 +128,7 @@ body {
 
     border-radius: 10px;
 
-<<<<<<< HEAD
     transition: color 180ms ease, background-color 180ms ease;
-=======
-    transition: all 0.3s ease;
->>>>>>> 697cc375cd85ca927a1dfc559da27f25298ff873
 }
 
 
@@ -197,16 +193,14 @@ body {
     margin-bottom: 30px;
 }
 
-<<<<<<< HEAD
 .calendar-cat-sticker {
-    width: 76px;
-    height: 76px;
+    width: 42px;
+    height: 42px;
     flex: 0 0 auto;
     object-fit: contain;
 }
 
-=======
->>>>>>> 697cc375cd85ca927a1dfc559da27f25298ff873
+
 .topbar h1 {
 
     font-size: 30px;
@@ -342,18 +336,19 @@ body {
         rgba(0, 0, 0, 0.05);
 
     transition:
-<<<<<<< HEAD
         border-color 180ms ease,
-        box-shadow 180ms ease;
-=======
-        transform 0.3s ease;
+        box-shadow 180ms ease,
+        transform 180ms ease;
+
+    color: inherit;
+    text-decoration: none;
 }
 
 
 .card:hover {
 
     transform: translateY(-5px);
->>>>>>> 697cc375cd85ca927a1dfc559da27f25298ff873
+
 }
 
 
@@ -376,6 +371,84 @@ body {
 .card p {
 
     color: #777;
+}
+
+.study-progress-card {
+    display: flex;
+    min-height: 190px;
+    height: 190px;
+    flex-direction: column;
+    align-items: stretch;
+    overflow: hidden;
+    cursor: default;
+}
+
+.study-progress-card:hover {
+    transform: none;
+}
+
+.study-progress-card > i {
+    margin-bottom: 6px;
+}
+
+.study-progress-card h3 {
+    margin: 0 0 4px;
+}
+
+.study-progress-card > p {
+    margin: 0 0 6px;
+    font-size: 12px;
+}
+
+.study-progress-card > .progress-bar {
+    height: 6px;
+    flex: 0 0 auto;
+    margin: 0;
+}
+
+.study-progress-list {
+    display: grid;
+    min-height: 0;
+    flex: 1 1 auto;
+    gap: 4px;
+    margin-top: 6px;
+    overflow-y: auto;
+}
+
+.study-progress-item {
+    min-width: 0;
+    padding: 3px 6px;
+    border-radius: 10px;
+    background: #f8f7fc;
+}
+
+.study-progress-label {
+    display: flex;
+    justify-content: space-between;
+    gap: 10px;
+    margin-bottom: 3px;
+    color: #403347;
+    font-size: 11px;
+}
+
+.study-progress-label span {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.study-progress-label strong {
+    flex: 0 0 auto;
+}
+
+.study-progress-item .progress-bar {
+    height: 3px;
+    margin: 0 0 3px;
+}
+
+.study-progress-item small {
+    color: #777;
+    font-size: 10px;
 }
 
 
@@ -451,21 +524,17 @@ body {
 
     cursor: pointer;
 
-<<<<<<< HEAD
-    transition: border-color 180ms ease, box-shadow 180ms ease;
-=======
+
     transition: all 0.3s ease;
->>>>>>> 697cc375cd85ca927a1dfc559da27f25298ff873
+
 }
 
 
 .action-card:hover {
 
-<<<<<<< HEAD
-=======
-    transform: translateY(-6px);
 
->>>>>>> 697cc375cd85ca927a1dfc559da27f25298ff873
+
+    transform: translateY(-6px);
     box-shadow:
         0 10px 25px
         rgba(0, 0, 0, 0.08);
@@ -575,6 +644,118 @@ body {
     line-height: 1.6;
 }
 
+.schedule-exam-form > p {
+    margin-bottom: 20px;
+}
+
+.schedule-form {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    align-items: end;
+    gap: 16px;
+}
+
+.schedule-field {
+    display: grid;
+    gap: 7px;
+}
+
+.schedule-field label {
+    font-size: 14px;
+    font-weight: 600;
+}
+
+.schedule-field input {
+    width: 100%;
+    min-width: 0;
+    padding: 12px;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    font: inherit;
+}
+
+.schedule-field input:focus {
+    border-color: #6c63ff;
+    outline: 2px solid rgba(108, 99, 255, .18);
+}
+
+.schedule-submit-btn {
+    justify-self: start;
+    padding: 12px 18px;
+    border: 0;
+    border-radius: 8px;
+    color: #fff;
+    background: #6c63ff;
+    font: inherit;
+    font-weight: 600;
+    cursor: pointer;
+}
+
+.schedule-submit-btn:hover {
+    background: #574fd6;
+}
+
+.schedule-status {
+    margin-top: 12px;
+    color: #26734d !important;
+}
+
+.schedule-table-wrap {
+    overflow-x: auto;
+}
+
+.schedule-table {
+    width: 100%;
+    border-collapse: collapse;
+    text-align: left;
+}
+
+.schedule-table th,
+.schedule-table td {
+    padding: 12px;
+    border-bottom: 1px solid #eee;
+}
+
+.schedule-table th {
+    color: #555;
+    font-size: 14px;
+}
+
+.schedule-empty {
+    color: #777;
+}
+
+.schedule-action-cell {
+    text-align: right;
+}
+
+.schedule-delete-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    padding: 8px 10px;
+    border: 1px solid #e8caca;
+    border-radius: 7px;
+    color: #a52e38;
+    background: #fff;
+    font: inherit;
+    font-size: 13px;
+    cursor: pointer;
+}
+
+.schedule-delete-btn:hover,
+.schedule-delete-btn:focus-visible {
+    border-color: #a52e38;
+    color: #fff;
+    background: #a52e38;
+}
+
+@media (max-width: 700px) {
+    .schedule-form {
+        grid-template-columns: 1fr;
+    }
+}
+
 
 /* =========================================
    AI ASSISTANT
@@ -641,10 +822,110 @@ body {
     margin-left: auto;
 }
 
+.ai-message {
+    white-space: pre-line;
+}
+
+.ai-document-note {
+    margin: 10px 0 16px;
+    color: #777;
+    font-size: 13px;
+    line-height: 1.5;
+}
+
+.ai-document-controls {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 10px;
+}
+
+.ai-document-controls label {
+    font-weight: 600;
+}
+
+.ai-document-controls select,
+.ai-document-controls button {
+    min-height: 40px;
+    padding: 8px 12px;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    font: inherit;
+}
+
+.ai-document-controls select {
+    flex: 1;
+    min-width: 180px;
+    background: #fff;
+}
+
+.ai-document-controls button {
+    border: 0;
+    color: #fff;
+    background: #6c63ff;
+    cursor: pointer;
+}
+
+.ai-document-controls button:disabled {
+    opacity: .55;
+    cursor: not-allowed;
+}
+
+.ai-document-controls button:not(:disabled):hover {
+    background: #574fd6;
+}
+
+.ai-document-controls .ai-clear-btn {
+    border: 1px solid #ddd;
+    color: #555;
+    background: #fff;
+}
+
+.ai-document-controls .ai-clear-btn:hover {
+    background: #f5f5f8;
+}
+
+.ai-suggestions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-top: 16px;
+}
+
+.ai-suggestion {
+    padding: 8px 12px;
+    border: 1px solid #dcd7f7;
+    border-radius: 999px;
+    color: #574fd6;
+    background: #fff;
+    font: inherit;
+    font-size: 13px;
+    cursor: pointer;
+    transition: background-color 160ms ease, border-color 160ms ease;
+}
+
+.ai-suggestion:hover,
+.ai-suggestion:focus-visible {
+    border-color: #6c63ff;
+    background: #f3f1ff;
+}
+
+.ai-typing {
+    color: #655b78;
+    animation: ai-pulse 900ms ease-in-out infinite alternate;
+}
+
+@keyframes ai-pulse {
+    from { opacity: .55; }
+    to { opacity: 1; }
+}
+
 
 .ai-input {
 
     display: flex;
+
+    align-items: stretch;
 
     gap: 10px;
 }
@@ -653,6 +934,8 @@ body {
 .ai-input input {
 
     flex: 1;
+
+    min-width: 0;
 
     padding: 14px;
 
@@ -666,6 +949,12 @@ body {
 
 .ai-input button {
 
+    display: inline-flex;
+
+    align-items: center;
+
+    gap: 8px;
+
     border: none;
 
     background: #6c63ff;
@@ -677,6 +966,156 @@ body {
     border-radius: 8px;
 
     cursor: pointer;
+}
+
+.ai-input button:disabled {
+    opacity: .55;
+    cursor: not-allowed;
+}
+
+@media (max-width: 600px) {
+    .ai-container {
+        padding: 20px;
+    }
+
+    .ai-document-controls {
+        align-items: stretch;
+    }
+
+    .ai-document-controls label {
+        width: 100%;
+    }
+
+    .ai-document-controls select {
+        min-width: 0;
+    }
+
+    .ai-input button span {
+        display: none;
+    }
+}
+
+.report-quiz-history {
+    margin-top: 20px;
+}
+
+.report-quiz-history > p {
+    margin-bottom: 18px;
+}
+
+.report-quiz-legend {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px 18px;
+    margin: 0 0 18px;
+    padding: 0;
+    color: #716d7e;
+    font-size: 12px;
+    list-style: none;
+}
+
+.report-quiz-legend li {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.report-legend-swatch {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+}
+
+.report-legend-perfect {
+    background: #218653;
+}
+
+.report-legend-average {
+    background: #e29124;
+}
+
+.report-legend-low {
+    background: #cf4650;
+}
+
+.report-quiz-list {
+    display: grid;
+    gap: 12px;
+}
+
+.report-quiz-record {
+    display: flex;
+    min-width: 0;
+    align-items: center;
+    justify-content: space-between;
+    gap: 18px;
+    padding: 14px 16px;
+    border: 1px solid #eceaf2;
+    border-radius: 11px;
+    background: #fbfaff;
+}
+
+.report-quiz-details {
+    display: grid;
+    min-width: 0;
+    gap: 5px;
+    overflow-wrap: anywhere;
+}
+
+.report-quiz-details > strong {
+    color: #302944;
+}
+
+.report-quiz-details > span,
+.report-quiz-details > time {
+    color: #716d7e;
+    font-size: 13px;
+    line-height: 1.45;
+}
+
+.report-quiz-chart-wrap {
+    flex: 0 0 auto;
+}
+
+.report-quiz-chart {
+    display: grid;
+    width: 76px;
+    aspect-ratio: 1;
+    place-items: center;
+    border-radius: 50%;
+    background: conic-gradient(
+        var(--report-score-color) calc(var(--report-score) * 1%),
+        #eceaf2 0
+    );
+}
+
+.report-quiz-chart span {
+    display: grid;
+    min-width: 40px;
+    min-height: 26px;
+    place-items: center;
+    padding: 2px 5px;
+    border-radius: 6px;
+    color: #302944;
+    background: rgb(255 255 255 / 92%);
+    font-size: 13px;
+    font-weight: 750;
+}
+
+.report-quiz-empty {
+    margin: 0;
+    padding: 16px 0;
+    color: #777384;
+}
+
+@media (max-width: 480px) {
+    .report-quiz-record {
+        padding: 12px;
+    }
+
+    .report-quiz-chart {
+        width: 64px;
+    }
 }
 
 
@@ -751,19 +1190,14 @@ body {
 
 .subject-card {
 
-<<<<<<< HEAD
-    border: 1px solid #dd7f7f;
-=======
-    border: 1px solid #eeeeee;
->>>>>>> 697cc375cd85ca927a1dfc559da27f25298ff873
 
+    border: 1px solid #dd7f7f;
+    border: 1px solid #eeeeee;
     padding: 20px;
 
     border-radius: 12px;
 }
 
-
-<<<<<<< HEAD
 .subject-card-heading {
 
     display: flex;
@@ -806,16 +1240,101 @@ body {
     color: #8e0000;
 }
 
-
-=======
->>>>>>> 697cc375cd85ca927a1dfc559da27f25298ff873
 .subject-card h3 {
 
     margin-bottom: 12px;
 }
 
+.subject-documents {
+    display: grid;
+    gap: 10px;
+    margin-top: 20px;
+    padding-top: 16px;
+    border-top: 1px solid #eee;
+}
 
-<<<<<<< HEAD
+.subject-documents h4 {
+    margin: 0;
+}
+
+.subject-documents > label {
+    font-size: 13px;
+    font-weight: 600;
+}
+
+.subject-pdf-input {
+    display: block;
+    width: 100%;
+    max-width: 100%;
+    padding: 10px;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    background: #fff;
+    font: inherit;
+}
+
+.subject-pdf-input:focus-visible {
+    outline: 2px solid #6c63ff;
+    outline-offset: 2px;
+}
+
+.subject-pdf-status {
+    color: #555;
+    font-size: 13px;
+    line-height: 1.5;
+}
+
+.subject-pdf-list {
+    display: grid;
+    gap: 8px;
+}
+
+.subject-pdf-row {
+    display: flex;
+    min-width: 0;
+    align-items: center;
+    gap: 8px;
+    padding: 8px;
+    border: 1px solid #eee;
+    border-radius: 8px;
+}
+
+.subject-pdf-name {
+    flex: 1;
+    overflow-wrap: anywhere;
+    font-size: 13px;
+}
+
+.subject-pdf-summary-btn,
+.subject-pdf-delete-btn {
+    flex: 0 0 auto;
+    padding: 7px 9px;
+    border: 1px solid #ddd;
+    border-radius: 7px;
+    background: #fff;
+    cursor: pointer;
+}
+
+.subject-pdf-summary-btn {
+    color: #574fd6;
+}
+
+.subject-pdf-delete-btn {
+    color: #a52e38;
+}
+
+.subject-pdf-summary-btn:hover,
+.subject-pdf-summary-btn:focus-visible {
+    border-color: #6c63ff;
+}
+
+.subject-pdf-delete-btn:hover,
+.subject-pdf-delete-btn:focus-visible {
+    border-color: #a52e38;
+    color: #fff;
+    background: #a52e38;
+}
+
 .topic-row {
 
     display: flex;
@@ -856,9 +1375,6 @@ body {
     color: #8e0000;
 }
 
-
-=======
->>>>>>> 697cc375cd85ca927a1dfc559da27f25298ff873
 /* =========================================
    PROFILE
 ========================================= */
@@ -1010,6 +1526,88 @@ body {
     background: #555;
 }
 
+.timer-status {
+    min-height: 24px;
+    color: #615a72;
+}
+
+.timer-records {
+    width: min(100%, 800px);
+    margin-top: 20px;
+}
+
+.timer-totals {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px 26px;
+    margin-bottom: 24px;
+}
+
+.timer-totals p {
+    margin: 0;
+}
+
+.timer-totals strong {
+    color: #5143ac;
+}
+
+.timer-records h3 {
+    margin-bottom: 12px;
+}
+
+.timer-session-history {
+    display: grid;
+    gap: 10px;
+}
+
+.timer-session-row {
+    display: flex;
+    min-width: 0;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    padding: 13px 15px;
+    border: 1px solid #eceaf2;
+    border-radius: 10px;
+    background: #fbfaff;
+}
+
+.timer-session-row > div:first-child {
+    display: grid;
+    min-width: 0;
+    gap: 5px;
+    overflow-wrap: anywhere;
+}
+
+.timer-session-row > div:first-child span,
+.timer-session-duration span {
+    color: #716d7e;
+    font-size: 13px;
+}
+
+.timer-session-duration {
+    display: grid;
+    flex: 0 0 auto;
+    gap: 5px;
+    text-align: right;
+}
+
+.timer-history-empty {
+    margin: 0;
+    color: #777384;
+}
+
+@media (max-width: 600px) {
+    .timer-session-row {
+        align-items: flex-start;
+        flex-direction: column;
+    }
+
+    .timer-session-duration {
+        text-align: left;
+    }
+}
+
 
 /* =========================================
    RESPONSIVE
@@ -1146,7 +1744,6 @@ body {
 
 }
 /* =========================================================
-<<<<<<< HEAD
    THEME AND RESPONSIVE NAVIGATION
 ========================================================= */
 
@@ -1504,8 +2101,8 @@ body {
         }
 
         .calendar-cat-sticker {
-            width: 58px;
-            height: 58px;
+            width: 34px;
+            height: 34px;
         }
 
         .profile {
@@ -1557,13 +2154,10 @@ body {
     }
 
 /* =========================================================
-=======
->>>>>>> 697cc375cd85ca927a1dfc559da27f25298ff873
    CALENDAR
 ========================================================= */
 
 .calendar-wrapper {
-<<<<<<< HEAD
     --cal-accent: #3b8fb6;
     --cal-soft: #e8f4f8;
     --cal-line: #cfe3ec;
@@ -1583,12 +2177,12 @@ body {
 .calendar-banner {
     position: relative;
     display: flex;
-    min-height: 190px;
+    min-height: 160px;
     align-items: center;
     justify-content: space-between;
     gap: 20px;
     overflow: hidden;
-    padding: clamp(22px, 4vw, 42px);
+    padding: clamp(18px, 3vw, 32px);
     border-radius: 16px;
     background: linear-gradient(130deg, var(--cal-sky-1), var(--cal-sky-2));
 }
@@ -1637,22 +2231,22 @@ body {
 }
 
 .calendar-banner-copy strong {
-    font-size: clamp(24px, 4vw, 38px);
+    font-size: clamp(22px, 3.5vw, 32px);
     font-weight: 600;
     letter-spacing: -.04em;
 }
 
 .calendar-month-art {
     display: grid;
-    width: clamp(82px, 12vw, 132px);
-    height: clamp(82px, 12vw, 132px);
+    width: clamp(76px, 10vw, 112px);
+    height: clamp(76px, 10vw, 112px);
     flex: 0 0 auto;
     place-items: center;
     border: 1px solid rgba(255, 255, 255, .6);
     border-radius: 30px;
     background: rgba(255, 255, 255, .45);
     box-shadow: 0 10px 24px rgba(55, 39, 71, .08);
-    font-size: clamp(42px, 7vw, 68px);
+    font-size: clamp(38px, 6vw, 58px);
 }
 
 .calendar-header {
@@ -1817,6 +2411,15 @@ body {
     font-size: 10px;
     font-weight: 500;
     text-overflow: ellipsis;
+}
+
+.calendar-event-topic {
+    display: block;
+    overflow: hidden;
+    padding-left: 16px;
+    font-size: 9px;
+    font-weight: 400;
+    text-overflow: ellipsis;
     white-space: nowrap;
 }
 
@@ -1869,7 +2472,8 @@ body {
 }
 
 .calendar-form input,
-.calendar-form select {
+.calendar-form select,
+.calendar-form textarea {
     width: 100%;
     min-width: 0;
     padding: 11px 12px;
@@ -1880,9 +2484,23 @@ body {
 }
 
 .calendar-form input:focus,
-.calendar-form select:focus {
+.calendar-form select:focus,
+.calendar-form textarea:focus {
     border-color: var(--cal-accent);
     box-shadow: 0 0 0 3px var(--cal-soft);
+}
+
+.calendar-event-panel #calendarSelectedEvents {
+    margin-top: 20px;
+}
+
+.calendar-event-panel #calendarSelectedEvents .content-box {
+    margin-top: 10px;
+    padding: 14px;
+}
+
+.calendar-event-panel #calendarSelectedEvents button {
+    margin: 4px 8px 0 0;
 }
 
 .calendar-save-btn {
@@ -1996,584 +2614,3 @@ body {
         grid-column: 1;
     }
 }
-=======
-
-    background: #ffffff;
-
-    border-radius: 15px;
-
-    padding: 25px;
-
-    box-shadow:
-        0 5px 20px rgba(0, 0, 0, 0.05);
-
-}
-
-
-
-/* =========================================================
-   CALENDAR HEADER
-========================================================= */
-
-.calendar-header {
-
-    display: flex;
-
-    align-items: center;
-
-    justify-content: space-between;
-
-    margin-bottom: 20px;
-
-}
-
-
-.calendar-title {
-
-    display: flex;
-
-    align-items: center;
-
-    gap: 10px;
-
-}
-
-
-.calendar-title select {
-
-    border: none;
-
-    background: transparent;
-
-    font-size: 28px;
-
-    font-weight: bold;
-
-    color: #222;
-
-    cursor: pointer;
-
-    outline: none;
-
-}
-
-
-.calendar-nav {
-
-    width: 42px;
-
-    height: 42px;
-
-    border: none;
-
-    border-radius: 50%;
-
-    background: #f0efff;
-
-    color: #6c63ff;
-
-    cursor: pointer;
-
-    transition: 0.3s;
-
-}
-
-
-.calendar-nav:hover {
-
-    background: #6c63ff;
-
-    color: white;
-
-}
-
-
-
-/* =========================================================
-   CALENDAR GRID
-========================================================= */
-
-.calendar {
-
-    width: 100%;
-
-    border: 1px solid #d5d5d5;
-
-}
-
-
-
-/* WEEK DAYS */
-
-.calendar-weekdays {
-
-    display: grid;
-
-    grid-template-columns:
-        repeat(7, 1fr);
-
-    background: #f5f5f5;
-
-    border-bottom: 1px solid #bdbdbd;
-
-}
-
-
-.calendar-weekdays div {
-
-    text-align: center;
-
-    padding: 10px 5px;
-
-    font-size: 11px;
-
-    font-weight: bold;
-
-    border-right: 1px solid #d0d0d0;
-
-}
-
-
-.calendar-weekdays div:last-child {
-
-    border-right: none;
-
-}
-
-
-
-/* DAYS */
-
-.calendar-days {
-
-    display: grid;
-
-    grid-template-columns:
-        repeat(7, 1fr);
-
-}
-
-
-
-/* INDIVIDUAL DAY */
-
-.calendar-day {
-
-    min-height: 105px;
-
-    border-right: 1px solid #bdbdbd;
-
-    border-bottom: 1px solid #bdbdbd;
-
-    padding: 7px;
-
-    cursor: pointer;
-
-    position: relative;
-
-    background: white;
-
-    transition: background 0.2s;
-
-}
-
-
-.calendar-day:hover {
-
-    background: #f8f7ff;
-
-}
-
-
-.calendar-day:nth-child(7n) {
-
-    border-right: none;
-
-}
-
-
-
-/* DAY NUMBER */
-
-.day-number {
-
-    font-size: 13px;
-
-    color: #333;
-
-    display: inline-block;
-
-    margin-bottom: 5px;
-
-}
-
-
-
-/* OTHER MONTH */
-
-.calendar-day.other-month {
-
-    background: #fafafa;
-
-    color: #aaa;
-
-    cursor: default;
-
-}
-
-
-.calendar-day.other-month .day-number {
-
-    color: #aaa;
-
-}
-
-
-
-/* TODAY */
-
-.calendar-day.today {
-
-    background: #f0efff;
-
-}
-
-
-.calendar-day.today
-.day-number {
-
-    background: #6c63ff;
-
-    color: white;
-
-    width: 25px;
-
-    height: 25px;
-
-    display: flex;
-
-    align-items: center;
-
-    justify-content: center;
-
-    border-radius: 50%;
-
-    font-weight: bold;
-
-}
-
-
-
-/* SELECTED DATE */
-
-.calendar-day.selected-date {
-
-    outline: 3px solid #6c63ff;
-
-    outline-offset: -3px;
-
-}
-
-
-
-/* =========================================================
-   EVENTS
-========================================================= */
-
-.day-events {
-
-    display: flex;
-
-    flex-direction: column;
-
-    gap: 4px;
-
-}
-
-
-.calendar-event {
-
-    font-size: 10px;
-
-    padding: 4px 5px;
-
-    border-radius: 4px;
-
-    overflow: hidden;
-
-    text-overflow: ellipsis;
-
-    white-space: nowrap;
-
-}
-
-
-.revision-event {
-
-    background: #e9e7ff;
-
-    color: #574fd6;
-
-}
-
-
-.exam-event {
-
-    background: #ffe5e5;
-
-    color: #c0392b;
-
-}
-
-
-.calendar-event i {
-
-    margin-right: 3px;
-
-}
-
-
-
-/* =========================================================
-   EVENT PANEL
-========================================================= */
-
-.calendar-event-panel {
-
-    margin-top: 25px;
-
-    padding: 25px;
-
-    background: #f8f8fc;
-
-    border-radius: 12px;
-
-    display: none;
-
-}
-
-
-.calendar-event-panel.show {
-
-    display: block;
-
-}
-
-
-.calendar-event-panel h2 {
-
-    margin-bottom: 5px;
-
-}
-
-
-.calendar-event-panel p {
-
-    color: #777;
-
-    margin-bottom: 20px;
-
-}
-
-
-
-/* =========================================================
-   FORM
-========================================================= */
-
-.calendar-form {
-
-    display: grid;
-
-    grid-template-columns:
-        repeat(2, 1fr);
-
-    gap: 15px;
-
-}
-
-
-.calendar-form label {
-
-    font-weight: 600;
-
-    font-size: 14px;
-
-}
-
-
-.calendar-form input,
-.calendar-form select {
-
-    width: 100%;
-
-    padding: 12px;
-
-    border: 1px solid #ddd;
-
-    border-radius: 8px;
-
-    background: white;
-
-    outline: none;
-
-}
-
-
-.calendar-form input:focus,
-.calendar-form select:focus {
-
-    border-color: #6c63ff;
-
-}
-
-
-.calendar-save-btn {
-
-    grid-column: span 2;
-
-    padding: 13px;
-
-    border: none;
-
-    border-radius: 8px;
-
-    background: #6c63ff;
-
-    color: white;
-
-    font-weight: bold;
-
-    cursor: pointer;
-
-    transition: 0.3s;
-
-}
-
-
-.calendar-save-btn:hover {
-
-    background: #574fd6;
-
-}
-
-
-
-/* =========================================================
-   LEGEND
-========================================================= */
-
-.calendar-legend {
-
-    display: flex;
-
-    gap: 25px;
-
-    margin-top: 20px;
-
-    font-size: 13px;
-
-    color: #666;
-
-}
-
-
-.calendar-legend div {
-
-    display: flex;
-
-    align-items: center;
-
-    gap: 7px;
-
-}
-
-
-.legend-box {
-
-    width: 15px;
-
-    height: 15px;
-
-    border-radius: 4px;
-
-    display: inline-block;
-
-}
-
-
-.revision-color {
-
-    background: #e9e7ff;
-
-}
-
-
-.exam-color {
-
-    background: #ffe5e5;
-
-}
-
-
-
-/* =========================================================
-   MOBILE
-========================================================= */
-
-@media (max-width: 700px) {
-
-    .calendar-wrapper {
-
-        padding: 10px;
-
-    }
-
-
-    .calendar-title select {
-
-        font-size: 18px;
-
-    }
-
-
-    .calendar-day {
-
-        min-height: 75px;
-
-        padding: 4px;
-
-    }
-
-
-    .calendar-weekdays div {
-
-        font-size: 8px;
-
-        padding: 8px 2px;
-
-    }
-
-
-    .calendar-event {
-
-        font-size: 8px;
-
-    }
-
-
-    .calendar-form {
-
-        grid-template-columns: 1fr;
-
-    }
-
-
-    .calendar-save-btn {
-
-        grid-column: span 1;
-
-    }
-
-}
->>>>>>> 697cc375cd85ca927a1dfc559da27f25298ff873

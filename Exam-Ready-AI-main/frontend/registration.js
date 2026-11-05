@@ -1,53 +1,81 @@
-// registration.js
-
-const existingUser = localStorage.getItem("registeredUser");
-
-if (existingUser) {
-    window.location.replace("login.html");
-}
+const API_URL = "http://127.0.0.1:5002/api/auth/register";
 
 const registrationForm = document.getElementById("registrationForm");
+const nameInput = document.getElementById("name");
+const emailInput = document.getElementById("email");
+const passwordInput = document.getElementById("password");
+const confirmPasswordInput = document.getElementById("confirmPassword");
+const message = document.getElementById("message");
 
-registrationForm.addEventListener("submit", function (event) {
-
+registrationForm.addEventListener("submit", async function (event) {
     event.preventDefault();
+    message.textContent = "";
+    message.className = "error";
 
-    const name = document.getElementById("name").value.trim();
-    const email = document.getElementById("email").value.trim();
-    const password = document.getElementById("password").value;
-    const confirmPassword =
-        document.getElementById("confirmPassword").value;
+    const name = nameInput.value.trim();
+    const email = emailInput.value.trim();
+    const password = passwordInput.value;
 
-    const message = document.getElementById("message");
+    if (!name) {
+        message.textContent = "Please enter your full name.";
+        nameInput.focus();
+        return;
+    }
 
-    if (password !== confirmPassword) {
-        message.textContent = "Passwords do not match.";
-        message.className = "error";
+    if (!emailInput.validity.valid) {
+        message.textContent = "Please enter a valid email address.";
+        emailInput.focus();
         return;
     }
 
     if (password.length < 6) {
-        message.textContent =
-            "Password must be at least 6 characters.";
-        message.className = "error";
+        message.textContent = "Password must contain at least 6 characters.";
+        passwordInput.focus();
         return;
     }
 
-    const user = {
-        name: name,
-        email: email,
-        password: password
-    };
+    if (password !== confirmPasswordInput.value) {
+        message.textContent = "Passwords do not match.";
+        confirmPasswordInput.focus();
+        return;
+    }
 
-    localStorage.setItem(
-        "registeredUser",
-        JSON.stringify(user)
-    );
+    const submitButton = registrationForm.querySelector('button[type="submit"]');
+    submitButton.disabled = true;
+    submitButton.textContent = "REGISTERING...";
 
-    message.textContent = "Registration successful!";
-    message.className = "success";
+    try {
+        const response = await fetch(API_URL, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ name, email, password })
+        });
 
-    setTimeout(function () {
-        window.location.replace("login.html");
-    }, 1000);
+        let result;
+        try {
+            result = await response.json();
+        } catch (error) {
+            console.error("Could not read the registration response:", error);
+            message.textContent = "The server returned an invalid response. Please try again.";
+            return;
+        }
+
+        if (!response.ok) {
+            message.textContent = result.message || "Registration failed. Please try again.";
+            return;
+        }
+
+        message.className = "success";
+        message.textContent = "Registration successful. Redirecting to login...";
+        setTimeout(function () {
+            window.location.replace("./login.html");
+        }, 1000);
+    } catch (error) {
+        console.error("Could not reach the registration service:", error);
+        message.textContent =
+            "Could not connect to the server. Make sure the backend is running and try again.";
+    } finally {
+        submitButton.disabled = false;
+        submitButton.textContent = "CREATE ACCOUNT";
+    }
 });

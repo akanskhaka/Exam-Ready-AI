@@ -1,3 +1,6 @@
+
+import os
+
 from flask import Flask, jsonify
 from flask_cors import CORS
 from flask_jwt_extended import JWTManager
@@ -16,19 +19,28 @@ from progress import progress_bp
 from analytics import analytics_bp
 from readiness import readiness_bp
 from reports import reports_bp
-
-import os
-from dotenv import load_dotenv
-
-load_dotenv()
+from models import (
+    CalendarEvent,
+    ProgressSnapshot,
+    Question,
+    Quiz,
+    QuizAttempt,
+    StudySession,
+    Subject,
+    Topic,
+    User
+)
 
 
 app = Flask(__name__)
 
+# Frontend connection
 CORS(app)
 
+# Database connection
 init_db(app)
 
+# JWT configuration
 app.config["JWT_SECRET_KEY"] = os.getenv(
     "JWT_SECRET_KEY"
 )
@@ -36,10 +48,7 @@ app.config["JWT_SECRET_KEY"] = os.getenv(
 jwt = JWTManager(app)
 
 
-# -----------------------------
-# REGISTER BLUEPRINTS
-# -----------------------------
-
+# Register API blueprints
 app.register_blueprint(auth_bp)
 app.register_blueprint(students_bp)
 app.register_blueprint(subjects_bp)
@@ -53,9 +62,24 @@ app.register_blueprint(analytics_bp)
 app.register_blueprint(readiness_bp)
 app.register_blueprint(reports_bp)
 
+# Create only the tables needed by the connected calendar, subjects, and reports.
+with app.app_context():
+    db.metadata.create_all(bind=db.engine, tables=[
+        User.__table__,
+        Subject.__table__,
+        Topic.__table__,
+        CalendarEvent.__table__,
+        Quiz.__table__,
+        Question.__table__,
+        QuizAttempt.__table__,
+        StudySession.__table__,
+        ProgressSnapshot.__table__
+    ])
+
 
 @app.route("/")
 def home():
+
     return jsonify({
         "message": "StudyAI Backend is running"
     })
@@ -63,21 +87,15 @@ def home():
 
 @app.route("/api/health")
 def health():
+
     return jsonify({
         "status": "ok",
         "message": "StudyAI API is working"
     })
 
 
-# -----------------------------
-# CREATE DATABASE TABLES
-# -----------------------------
-
-with app.app_context():
-    db.create_all()
-
-
 if __name__ == "__main__":
+
     app.run(
         debug=True,
         port=5002

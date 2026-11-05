@@ -1,4 +1,5 @@
-<<<<<<< HEAD
+const API_URL = "http://127.0.0.1:5002/api/auth/login";
+
 const loginForm = document.getElementById("loginForm");
 const emailInput = document.getElementById("email");
 const passwordInput = document.getElementById("password");
@@ -17,86 +18,60 @@ togglePassword.addEventListener("click", function () {
         : '<i class="fa-regular fa-eye"></i>';
 });
 
-loginForm.addEventListener("submit", function (event) {
+loginForm.addEventListener("submit", async function (event) {
     event.preventDefault();
+    statusMessage.textContent = "";
 
-    const storedUser = localStorage.getItem("registeredUser");
-    if (!storedUser) {
-        statusMessage.textContent = "No registered account was found.";
+    const email = emailInput.value.trim();
+    const password = passwordInput.value;
+
+    if (!email || !password) {
+        statusMessage.textContent = "Enter your email and password.";
         return;
     }
 
-    let user;
+    const submitButton = loginForm.querySelector('button[type="submit"]');
+    submitButton.disabled = true;
+
     try {
-        user = JSON.parse(storedUser);
+        const response = await fetch(API_URL, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ email, password })
+        });
+
+        let result;
+        try {
+            result = await response.json();
+        } catch (error) {
+            console.error("Could not read the login response:", error);
+            statusMessage.textContent = "The server returned an invalid response. Please try again.";
+            return;
+        }
+
+        if (!response.ok) {
+            statusMessage.textContent = result.message || "Login failed. Please try again.";
+            return;
+        }
+
+        try {
+            sessionStorage.setItem("accessToken", result.token);
+            sessionStorage.setItem("userId", String(result.user.id));
+            sessionStorage.setItem("isLoggedIn", "true");
+            sessionStorage.setItem("userName", result.user.name);
+        } catch (error) {
+            console.error("Could not save the login session:", error);
+            statusMessage.textContent = "Could not save your login session in this browser.";
+            return;
+        }
+
+        statusMessage.textContent = "Login successful!";
+        window.location.replace("./dashboard.html");
     } catch (error) {
-        console.error("Could not read registered account:", error);
-        statusMessage.textContent = "Could not read the saved account. Please register again.";
-        return;
-    }
-
-    if (emailInput.value.trim() !== user.email || passwordInput.value !== user.password) {
-        statusMessage.textContent = "Incorrect email or password.";
-        return;
-    }
-
-    sessionStorage.setItem("isLoggedIn", "true");
-    sessionStorage.setItem("userName", user.name);
-    statusMessage.textContent = "Login successful!";
-
-    window.location.replace("./dashboard.html");
-});
-=======
-// login.js
-
-const registeredUser =
-    localStorage.getItem("registeredUser");
-
-// No registered user → registration page
-if (!registeredUser) {
-    window.location.replace("registration.html");
-}
-
-const loginForm = document.getElementById("loginForm");
-
-loginForm.addEventListener("submit", function (event) {
-
-    event.preventDefault();
-
-    const user = JSON.parse(
-        localStorage.getItem("registeredUser")
-    );
-
-    const email =
-        document.getElementById("loginEmail").value.trim();
-
-    const password =
-        document.getElementById("loginPassword").value;
-
-    const message =
-        document.getElementById("loginMessage");
-
-    if (
-        email === user.email &&
-        password === user.password
-    ) {
-
-        sessionStorage.setItem("isLoggedIn", "true");
-        sessionStorage.setItem("userName", user.name);
-
-        message.textContent = "Login successful!";
-        message.className = "success";
-
-        setTimeout(function () {
-            window.location.replace("dashboard.html");
-        }, 700);
-
-    } else {
-
-        message.textContent =
-            "Incorrect email or password.";
-
-        message.className = "error";
+        console.error("Could not reach the login service:", error);
+        statusMessage.textContent =
+            "Could not connect to the server. Make sure the backend is running and try again.";
+    } finally {
+        submitButton.disabled = false;
     }
 });
->>>>>>> 697cc375cd85ca927a1dfc559da27f25298ff873

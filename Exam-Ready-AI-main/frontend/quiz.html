@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="theme-color" content="#f5f4fb">
+    <title>Study Quiz | ExamReadyAI</title>
+    <link rel="stylesheet" href="quiz.css">
+</head>
+<body>
+    <header class="quiz-header">
+        <a class="brand" href="dashboard.html" aria-label="ExamReadyAI dashboard">
+            ExamReady<span>AI</span>
+        </a>
+        <a class="back-link" href="dashboard.html">Back to dashboard</a>
+    </header>
+
+    <main class="quiz-page">
+        <section class="page-intro">
+            <p class="eyebrow">PERSONALIZED PRACTICE</p>
+            <h1>Study Quiz</h1>
+            <p>Build a quiz from a subject's study PDF or syllabus topics. Scores are saved with the subject.</p>
+        </section>
+
+        <section class="panel" aria-labelledby="builder-heading">
+            <div class="panel-heading">
+                <div>
+                    <p class="eyebrow">CREATE A QUIZ</p>
+                    <h2 id="builder-heading">Choose what to study</h2>
+                </div>
+            </div>
+
+            <div class="builder-controls">
+                <div class="form-field">
+                    <label for="studyQuizSubject">Subject</label>
+                    <select id="studyQuizSubject">
+                        <option value="">Select a subject</option>
+                    </select>
+                </div>
+                <div class="form-field">
+                    <label for="studyQuizUnit">Unit (optional)</label>
+                    <select id="studyQuizUnit" disabled>
+                        <option value="">All units</option>
+                    </select>
+                </div>
+                <div class="form-field">
+                    <label for="studyQuizDocument">Study PDF</label>
+                    <select id="studyQuizDocument" disabled>
+                        <option value="">Select a subject first</option>
+                    </select>
+                </div>
+                <button class="primary-button" id="generateStudyQuiz" type="button" disabled>
+                    Generate quiz
+                </button>
+            </div>
+
+            <p id="studyQuizStatus" class="status-message" role="status" aria-live="polite"></p>
+            <div id="studyQuizQuestions"></div>
+            <div id="retryQuizNotice" class="retry-notice" role="status" aria-live="polite" hidden>
+                <p id="retryQuizMessage"></p>
+                <button class="secondary-button" id="retryQuiz" type="button">Retake quiz</button>
+            </div>
+        </section>
+
+        <section class="panel" aria-labelledby="scores-heading">
+            <div class="panel-heading score-heading">
+                <div>
+                    <p class="eyebrow">YOUR PROGRESS</p>
+                    <h2 id="scores-heading">Quiz scores</h2>
+                </div>
+                <p class="average-score">Average <strong id="averageQuizScore">0%</strong></p>
+            </div>
+            <ul class="score-legend" aria-label="Score chart colors">
+                <li><span class="legend-swatch is-perfect"></span>Maximum: 100%</li>
+                <li><span class="legend-swatch is-average"></span>Average: 50-99%</li>
+                <li><span class="legend-swatch is-low"></span>Below average: under 50%</li>
+            </ul>
+
+            <form id="manualQuizForm" class="manual-score-form">
+                <div class="form-field">
+                    <label for="quizName">Quiz name</label>
+                    <input id="quizName" name="name" type="text" maxlength="100" required
+                           placeholder="e.g. Chapter 2 review">
+                </div>
+                <div class="form-field">
+                    <label for="quizScore">Score (%)</label>
+                    <input id="quizScore" name="score" type="number" min="0" max="100"
+                           step="1" required placeholder="0-100">
+                </div>
+                <div class="form-field">
+                    <label for="quizSubject">Subject</label>
+                    <select id="quizSubject" name="subject">
+                        <option value="">General quiz</option>
+                    </select>
+                </div>
+                <button class="secondary-button" type="submit">Save score</button>
+            </form>
+
+            <p id="manualQuizStatus" class="status-message" role="status" aria-live="polite"></p>
+            <div id="quizList" class="quiz-list"></div>
+        </section>
+    </main>
+
+    <script src="api.js"></script>
+    <script src="quiz.js"></script>
+</body>
+</html>

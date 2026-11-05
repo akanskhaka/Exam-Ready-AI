@@ -1,3 +1,5 @@
+const API_URL = "http://127.0.0.1:5002/api/auth/register";
+
 const registerForm = document.getElementById("registerForm");
 const nameInput = document.getElementById("name");
 const emailInput = document.getElementById("email");
@@ -14,11 +16,11 @@ togglePassword.addEventListener("click", function () {
         isPasswordHidden ? "Hide password" : "Show password"
     );
     togglePassword.innerHTML = isPasswordHidden
-        ? '<i class="fa-regular fa-eye-slash"></i>'
-        : '<i class="fa-regular fa-eye"></i>';
+        ? '<i class="fa-regular fa-eye-slash" aria-hidden="true"></i>'
+        : '<i class="fa-regular fa-eye" aria-hidden="true"></i>';
 });
 
-registerForm.addEventListener("submit", function (event) {
+registerForm.addEventListener("submit", async function (event) {
     event.preventDefault();
     statusMessage.textContent = "";
 
@@ -50,32 +52,43 @@ registerForm.addEventListener("submit", function (event) {
         return;
     }
 
-    let existingUser;
-    try {
-        existingUser = localStorage.getItem("registeredUser");
-    } catch (error) {
-        console.error("Could not access browser storage:", error);
-        statusMessage.textContent = "Account storage is unavailable in this browser.";
-        return;
-    }
+    const submitButton = registerForm.querySelector('button[type="submit"]');
+    submitButton.disabled = true;
+    submitButton.textContent = "Creating account...";
 
-    if (existingUser) {
+    try {
+        const response = await fetch(API_URL, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ name, email, password })
+        });
+
+        let result;
+        try {
+            result = await response.json();
+        } catch (error) {
+            console.error("Could not read the registration response:", error);
+            statusMessage.textContent =
+                "The server returned an invalid response. Please try again.";
+            return;
+        }
+
+        if (!response.ok) {
+            statusMessage.textContent =
+                result.message || "Registration failed. Please try again.";
+            return;
+        }
+
+        statusMessage.textContent = "Registration successful. Redirecting to login...";
+        setTimeout(function () {
+            window.location.replace("./login.html");
+        }, 1000);
+    } catch (error) {
+        console.error("Could not reach the registration service:", error);
         statusMessage.textContent =
-            "An account is already registered in this browser. Please log in.";
-        return;
+            "Could not connect to the server. Make sure the backend is running and try again.";
+    } finally {
+        submitButton.disabled = false;
+        submitButton.textContent = "Create Account";
     }
-
-    try {
-        localStorage.setItem("registeredUser", JSON.stringify({
-            name: name,
-            email: email,
-            password: password
-        }));
-    } catch (error) {
-        console.error("Could not save registered account:", error);
-        statusMessage.textContent = "Could not save your account. Please try again.";
-        return;
-    }
-
-    window.location.replace("./login.html");
 });
