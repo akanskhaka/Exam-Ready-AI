@@ -17,6 +17,7 @@ let studentData = {
 let dataLoadError = null;
 let calendarEvents = [];
 let currentDashboardPage = "dashboard";
+let studentProfile = null;
 const MAX_PDF_TEXT_LENGTH = 150000;
 let pdfJsPromise = null;
 
@@ -202,7 +203,10 @@ function applyProfileName() {
     const profile = getProfile();
     if (topbarName) {
         topbarName.textContent =
-            profile.name || sessionStorage.getItem("userName") || "Student";
+            (studentProfile && studentProfile.name) ||
+            profile.name ||
+            sessionStorage.getItem("userName") ||
+            "Student";
     }
 }
 
@@ -210,10 +214,16 @@ function applyProfileName() {
 loadData();
 
 async function refreshDashboardData() {
-    const [subjects, report] = await Promise.all([
+    const [subjects, report, profile, exams, revisions] = await Promise.all([
         examReadyApi.get("/subjects"),
-        examReadyApi.get("/reports/dashboard")
+        examReadyApi.get("/reports/dashboard"),
+        examReadyApi.get("/students/profile"),
+        examReadyApi.get("/exams"),
+        examReadyApi.get("/revisions")
     ]);
+
+    studentProfile = profile;
+    applyProfileName();
 
     const previousSubjects = studentData.subjects;
     studentData.subjects = subjects.map(subject => {
@@ -244,12 +254,34 @@ async function refreshDashboardData() {
         correctAnswers: attempt.correct_answers,
         totalQuestions: attempt.total_questions
     }));
+    studentData.exams = exams.map(exam => ({
+        id: exam.id,
+        subject: exam.exam_name,
+        topic: exam.contents || "",
+        date: exam.exam_date,
+        subjectId: exam.subject_id
+    }));
+    studentData.revisions = revisions.map(revision => {
+        const subject = studentData.subjects.find(
+            item => String(item.id) === String(revision.subject_id)
+        );
+        return {
+            id: revision.id,
+            subject: subject ? subject.name : "Subject",
+            topic: revision.topic,
+            date: revision.revision_date
+        };
+    });
     saveData();
 }
 
 function showDashboardApiError(error) {
     console.error("Could not load student data from the server:", error);
-    if (error.status === 401) {
+    if (error.status === 401 || error.status === 422) {
+        sessionStorage.removeItem("accessToken");
+        sessionStorage.removeItem("userId");
+        sessionStorage.removeItem("isLoggedIn");
+        sessionStorage.removeItem("userName");
         window.location.replace("./login.html");
         return;
     }
@@ -275,6 +307,9 @@ function openDashboard() {
         "Track your actual study progress and academic activity.";
 
     const totalSubjects = studentData.subjects.length;
+    const studentName = studentProfile && studentProfile.name
+        ? studentProfile.name
+        : "Student";
     const studyHours = Math.floor(studentData.studyMinutes / 60);
     const studyMinutes = studentData.studyMinutes % 60;
     const subjectProgress = studentData.subjects.map(subject => {
@@ -315,7 +350,7 @@ function openDashboard() {
         <!-- WELCOME -->
         <div class="welcome-card">
             <div>
-                <h2>Welcome to your Dashboard</h2>
+                <h2>Welcome, ${escapeHtml(studentName)}</h2>
                 <p>
                     Add your subjects, topics and study sessions.
                     Your dashboard will update automatically.
@@ -387,13 +422,6 @@ function openDashboard() {
         <h2 class="section-heading">Quick Actions</h2>
 
         <div class="dashboard-actions">
-
-            <div class="action-card" data-action="ai">
-                <div class="action-icon"><i class="fa-solid fa-robot"></i></div>
-                <h3>AI Assistant</h3>
-                <p>Ask questions and get study guidance.</p>
-                <button type="button">Open Assistant</button>
-            </div>
 
             <div class="action-card" data-action="calendar">
                 <div class="action-icon"><i class="fa-solid fa-calendar"></i></div>
@@ -1503,6 +1531,10 @@ function renderSelectedCalendarEvents() {
                 renderCalendarDays();
                 renderSelectedCalendarEvents();
             } catch (error) {
+                if (error.status === 401 || error.status === 422) {
+                    showDashboardApiError(error);
+                    return;
+                }
                 alert(`Could not delete the event: ${error.message}`);
             }
         });
@@ -1556,6 +1588,10 @@ async function saveCalendarEvent() {
         renderCalendarDays();
         renderSelectedCalendarEvents();
     } catch (error) {
+        if (error.status === 401 || error.status === 422) {
+            showDashboardApiError(error);
+            return;
+        }
         alert(`Could not save the event: ${error.message}`);
     }
 }
@@ -1582,9 +1618,9 @@ function openSchedule() {
         .map(topic => topic.name)
         .filter(name => typeof name === "string" && name.trim()))];
     const exams = studentData.exams
-        .map((exam, index) => ({ exam, index }))
+        .slice()
         .sort((first, second) =>
-            String(first.exam.date || "").localeCompare(String(second.exam.date || ""))
+            String(first.date || "").localeCompare(String(second.date || ""))
     );
 
     contentArea.innerHTML = `
@@ -1663,14 +1699,14 @@ function openSchedule() {
                             </td>
                         </tr>
                         `
-                        : exams.map(({ exam, index }) => `
+                        : exams.map(exam => `
                         <tr>
                             <td>${escapeHtml(exam.subject)}</td>
                             <td>${escapeHtml(exam.topic)}</td>
                             <td>${escapeHtml(exam.date)}</td>
                             <td class="schedule-action-cell">
                                 <button type="button" class="schedule-delete-btn"
-                                        data-exam-index="${index}"
+                                        data-exam-id="${exam.id}"
                                         aria-label="Delete ${escapeHtml(exam.subject)} exam on ${escapeHtml(exam.date)}"
                                         title="Delete exam">
                                     <i class="fa-solid fa-trash" aria-hidden="true"></i>
@@ -1761,42 +1797,57 @@ function openSchedule() {
         </div>
     `;
 
-    document.getElementById("examScheduleForm").addEventListener("submit", function (event) {
+    document.getElementById("examScheduleForm").addEventListener("submit", async function (event) {
         event.preventDefault();
 
         const subject = document.getElementById("examSubject").value.trim();
         const topic = document.getElementById("examTopic").value.trim();
         const date = document.getElementById("examDate").value;
+        const status = document.getElementById("examScheduleStatus");
 
         if (!subject || !topic || !date) {
-            document.getElementById("examScheduleStatus").textContent =
-                "Enter a subject, topic, and exam date.";
+            status.textContent = "Enter a subject, topic, and exam date.";
             return;
         }
 
-        studentData.exams.push({
-            id: Date.now(),
-            subject,
-            topic,
-            date
-        });
+        const linkedSubject = studentData.subjects.find(
+            item => item.name.toLowerCase() === subject.toLowerCase()
+        );
 
-        const [year, month] = date.split("-").map(Number);
-        calendarDate.setFullYear(year, month - 1, 1);
-        calendarFocusDate = date;
+        try {
+            const exam = await examReadyApi.post("/exams", {
+                subject_id: linkedSubject ? linkedSubject.id : null,
+                exam_name: subject,
+                exam_date: date,
+                contents: topic
+            });
+            studentData.exams.push({
+                id: exam.id,
+                subject: exam.exam_name,
+                topic: exam.contents || "",
+                date: exam.exam_date,
+                subjectId: exam.subject_id
+            });
+            saveData();
 
-        const saved = saveData();
-        openSchedule();
-        document.getElementById("examScheduleStatus").textContent =
-            saved
-                ? "Exam added to your schedule."
-                : dataLoadError || "The exam could not be saved.";
+            const [year, month] = date.split("-").map(Number);
+            calendarDate.setFullYear(year, month - 1, 1);
+            calendarFocusDate = date;
+            openSchedule();
+            document.getElementById("examScheduleStatus").textContent =
+                "Exam saved to your schedule and calendar.";
+        } catch (error) {
+            console.error("Could not save exam:", error);
+            status.setAttribute("role", "alert");
+            status.textContent = `The exam could not be saved: ${error.message}`;
+        }
     });
 
     document.querySelectorAll(".schedule-delete-btn").forEach(button => {
-        button.addEventListener("click", function () {
-            const examIndex = Number(this.dataset.examIndex);
-            const exam = studentData.exams[examIndex];
+        button.addEventListener("click", async function () {
+            const exam = studentData.exams.find(
+                item => String(item.id) === this.dataset.examId
+            );
 
             if (!exam)
                 return;
@@ -1804,21 +1855,19 @@ function openSchedule() {
             if (!window.confirm(`Delete the exam for "${exam.subject}" on ${exam.date}?`))
                 return;
 
-            studentData.exams.splice(examIndex, 1);
-            const saved = saveData();
-
-            if (!saved) {
-                studentData.exams.splice(examIndex, 0, exam);
-            }
-
-            openSchedule();
-
-            if (!saved) {
-                document.getElementById("scheduleDeleteStatus").textContent =
-                    dataLoadError || "The exam could not be deleted.";
-            } else {
+            try {
+                await examReadyApi.delete(`/exams/${exam.id}`);
+                studentData.exams = studentData.exams.filter(
+                    item => item.id !== exam.id
+                );
+                saveData();
+                openSchedule();
                 document.getElementById("scheduleDeleteStatus").textContent =
                     "Exam deleted from your schedule and calendar.";
+            } catch (error) {
+                console.error("Could not delete exam:", error);
+                document.getElementById("scheduleDeleteStatus").textContent =
+                    `The exam could not be deleted: ${error.message}`;
             }
         });
     });
@@ -1933,355 +1982,6 @@ function openProfile() {
         applyProfileName();
         alert("Profile saved successfully!");
     });
-}
-
-
-/* =========================================================
-   AI ASSISTANT
-========================================================= */
-
-function getStudyPdfDocuments() {
-    return studentData.subjects.flatMap((subject, subjectIndex) =>
-        (Array.isArray(subject.documents) ? subject.documents : [])
-            .map((documentData, documentIndex) => ({
-                key: `${subjectIndex}:${documentIndex}`,
-                subject,
-                document: documentData
-            }))
-    );
-}
-
-
-function getPdfSentences(documentData) {
-    return (Array.isArray(documentData.pages) ? documentData.pages : [])
-        .flatMap((page, pageIndex) =>
-            page.split(/(?<=[.!?])\s+/)
-                .map(text => ({ text: text.trim(), page: pageIndex + 1 }))
-                .filter(sentence => sentence.text)
-        );
-}
-
-
-const pdfSummaryStopWords = new Set([
-    "about", "after", "again", "also", "and", "are", "because", "been",
-    "before", "being", "between", "but", "can", "could", "did", "does",
-    "each", "for", "from", "had", "has", "have", "her", "here", "his",
-    "into", "its", "may", "more", "most", "not", "our", "out", "over",
-    "same", "should", "some", "such", "than", "that", "the", "their",
-    "them", "then", "there", "these", "they", "this", "those", "through",
-    "under", "use", "was", "were", "what", "when", "where", "which",
-    "while", "who", "will", "with", "would", "you", "your"
-]);
-
-
-function getPdfKeywords(text) {
-    return (text.toLowerCase().match(/[a-z0-9]{2,}/g) || [])
-        .filter(word => !pdfSummaryStopWords.has(word));
-}
-
-
-function summarizePdf(documentData) {
-    const sentences = getPdfSentences(documentData);
-    if (sentences.length === 0)
-        return "No readable text was found in this PDF.";
-
-    const frequencies = new Map();
-    sentences.forEach(sentence => {
-        new Set(getPdfKeywords(sentence.text)).forEach(word => {
-            frequencies.set(word, (frequencies.get(word) || 0) + 1);
-        });
-    });
-
-    const ranked = sentences.map((sentence, index) => {
-        const words = new Set(getPdfKeywords(sentence.text));
-        const score = [...words].reduce((total, word) =>
-            total + Math.log(1 + sentences.length / frequencies.get(word)), 0
-        ) / Math.sqrt(Math.max(words.size, 1));
-        return { ...sentence, index, score };
-    });
-
-    const selected = ranked
-        .sort((first, second) => second.score - first.score)
-        .slice(0, Math.min(5, ranked.length))
-        .sort((first, second) => first.index - second.index);
-
-    return selected.map(sentence =>
-        `${sentence.text} (page ${sentence.page})`
-    ).join("\n\n");
-}
-
-
-function answerFromPdf(question, documents) {
-    const queryWords = new Set(getPdfKeywords(question));
-    if (queryWords.size === 0)
-        return "Please include a few keywords from the PDF in your question.";
-
-    const results = documents.flatMap(({ subject, document }) => {
-        const sentences = getPdfSentences(document);
-        const frequencies = new Map();
-        sentences.forEach(sentence => {
-            new Set(getPdfKeywords(sentence.text)).forEach(word => {
-                frequencies.set(word, (frequencies.get(word) || 0) + 1);
-            });
-        });
-
-        return sentences.map(sentence => {
-            const sentenceWords = new Set(getPdfKeywords(sentence.text));
-            const matches = [...queryWords].filter(word => sentenceWords.has(word));
-            const score = matches.reduce((total, word) =>
-                total + 1 + Math.log(1 + sentences.length / (frequencies.get(word) || 1)), 0
-            );
-            return { ...sentence, document, subject, score };
-        }).filter(result => result.score > 0);
-    }).sort((first, second) => second.score - first.score);
-
-    if (results.length === 0) {
-        const names = documents.map(({ document }) => `"${document.name}"`).join(", ");
-        return `I couldn't find a relevant passage in ${names}. Try asking with words used in the PDF.`;
-    }
-
-    const excerpts = results.slice(0, 3).map(result =>
-        `“${result.text}” (${result.subject.name}, ${result.document.name}, page ${result.page})`
-    );
-    return `I found these relevant passages:\n\n${excerpts.join("\n\n")}`;
-}
-
-
-function openAI(options = {}) {
-
-    clearTimer();
-
-    pageTitle.textContent = "AI Assistant";
-    pageDescription.textContent =
-        "Ask questions about your uploaded study PDFs or request a summary.";
-
-    const documents = getStudyPdfDocuments();
-    const selectedDocument = documents.find(({ subject, document }) =>
-        options.subjectId !== undefined &&
-        String(subject.id) === String(options.subjectId) &&
-        String(document.id) === String(options.documentId)
-    );
-    const initialSelection = selectedDocument ? selectedDocument.key : "";
-
-    contentArea.innerHTML = `
-        <div class="ai-container">
-
-            <h2>AI Study Assistant</h2>
-            <p class="ai-document-note">
-                PDF text is processed in your browser and stays in this browser.
-                Answers use passages from your documents; scanned PDFs need OCR.
-            </p>
-
-            <div class="ai-document-controls">
-                <label for="aiDocumentSelect">Use study PDF</label>
-                <select id="aiDocumentSelect" ${documents.length ? "" : "disabled"}>
-                    <option value="">Choose a PDF</option>
-                    <option value="all">All uploaded PDFs</option>
-                    ${documents.map(({ key, subject, document }) => `
-                        <option value="${escapeHtml(key)}">
-                            ${escapeHtml(subject.name)} — ${escapeHtml(document.name)}
-                        </option>
-                    `).join("")}
-                </select>
-                <button type="button" id="summarizePDF" ${documents.length ? "" : "disabled"}>
-                    Summarize PDF
-                </button>
-                <button type="button" id="clearAIChat" class="ai-clear-btn">
-                    Clear chat
-                </button>
-            </div>
-
-            <div id="aiSuggestions" class="ai-suggestions" aria-label="Suggested questions"></div>
-
-            <div class="chat-box" id="chatBox" role="log" aria-live="polite" aria-relevant="additions">
-                <div class="message ai-message">
-                    Hello! Select a PDF to get answers from its text or generate an extractive summary.
-                </div>
-            </div>
-
-            <form class="ai-input" id="aiQuestionForm">
-                <input id="aiInput" type="text" maxlength="500"
-                       aria-label="Your question" placeholder="Ask a question..." autocomplete="off">
-                <button type="submit" id="sendAI" disabled>
-                    <i class="fa-solid fa-paper-plane"></i>
-                    <span>Send</span>
-                </button>
-            </form>
-
-        </div>
-    `;
-
-    const input = document.getElementById("aiInput");
-    const button = document.getElementById("sendAI");
-    const chat = document.getElementById("chatBox");
-    const documentSelect = document.getElementById("aiDocumentSelect");
-    const summarizeButton = document.getElementById("summarizePDF");
-    const clearButton = document.getElementById("clearAIChat");
-    const questionForm = document.getElementById("aiQuestionForm");
-    const suggestions = document.getElementById("aiSuggestions");
-    let responsePending = false;
-
-    if (initialSelection) {
-        documentSelect.value = initialSelection;
-    }
-
-    function appendMessage(className, text) {
-        const message = document.createElement("div");
-        message.className = `message ${className}`;
-        message.textContent = text;
-        chat.appendChild(message);
-        chat.scrollTop = chat.scrollHeight;
-    }
-
-    function getSelectedDocuments() {
-        const source = documentSelect.value;
-        return source === "all"
-            ? documents
-            : documents.filter(item => item.key === source);
-    }
-
-    function updateSuggestions() {
-        const selectedDocuments = getSelectedDocuments();
-        let questions = [
-            "Help me plan my revision",
-            "How should I prepare for an exam?"
-        ];
-
-        if (selectedDocuments.length > 0) {
-            const terms = new Map();
-            selectedDocuments.forEach(({ document }) => {
-                getPdfSentences(document).forEach(({ text }) => {
-                    new Set(getPdfKeywords(text)).forEach(word => {
-                        terms.set(word, (terms.get(word) || 0) + 1);
-                    });
-                });
-            });
-
-            const keywords = [...terms]
-                .sort((first, second) => second[1] - first[1])
-                .slice(0, 3)
-                .map(([word]) => word);
-
-            questions = [
-                "Summarize this PDF",
-                ...keywords.slice(0, 2).map(word => `Explain ${word}`)
-            ];
-        }
-
-        suggestions.replaceChildren();
-        questions.forEach(question => {
-            const chip = document.createElement("button");
-            chip.type = "button";
-            chip.className = "ai-suggestion";
-            chip.textContent = question;
-            chip.addEventListener("click", () => {
-                if (question === "Summarize this PDF") {
-                    summarizeSelectedDocuments();
-                    return;
-                }
-
-                input.value = question;
-                updateSendButton();
-                questionForm.requestSubmit();
-            });
-            suggestions.appendChild(chip);
-        });
-    }
-
-    function updateSendButton() {
-        button.disabled = responsePending || !input.value.trim();
-    }
-
-    function summarizeSelectedDocuments() {
-        const selectedDocuments = getSelectedDocuments();
-        if (selectedDocuments.length === 0) {
-            appendMessage("ai-message", "Choose a PDF first to summarize it.");
-            return;
-        }
-
-        selectedDocuments.forEach(({ subject, document }) => {
-            appendMessage(
-                "ai-message",
-                `Summary of "${document.name}" (${subject.name}):\n\n${summarizePdf(document)}`
-            );
-        });
-    }
-
-    function sendMessage(event) {
-        event.preventDefault();
-
-        const question = input.value.trim();
-
-        if (!question || responsePending)
-            return;
-
-        appendMessage("user-message", question);
-        input.value = "";
-        responsePending = true;
-        updateSendButton();
-
-        const loading = document.createElement("div");
-        loading.className = "message ai-message ai-typing";
-        loading.setAttribute("role", "status");
-        loading.textContent = "Looking through your study material...";
-        chat.appendChild(loading);
-        chat.scrollTop = chat.scrollHeight;
-
-        const selectedDocuments = getSelectedDocuments();
-
-        window.setTimeout(() => {
-            if (!document.body.contains(chat))
-                return;
-
-            try {
-                let answer;
-                if (selectedDocuments.length > 0) {
-                    answer = answerFromPdf(question, selectedDocuments);
-                } else {
-                    answer = "Try adding a study PDF to a subject so I can answer from your notes.";
-                    const q = question.toLowerCase();
-
-                    if (q.includes("python")) {
-                        answer = "For Python, focus on variables, loops, functions, lists, dictionaries and OOP.";
-                    } else if (q.includes("sql") || q.includes("dbms")) {
-                        answer = "For DBMS and SQL, practice SELECT, JOIN, GROUP BY, normalization, keys and transactions.";
-                    } else if (q.includes("exam") || q.includes("revision")) {
-                        answer = "Focus on your incomplete topics first, then attempt quizzes and revise your mistakes.";
-                    }
-                }
-
-                loading.remove();
-                appendMessage("ai-message", answer);
-            } catch (error) {
-                console.error("Could not answer the study question:", error);
-                loading.remove();
-                appendMessage("ai-message", "I couldn't process that question. Please try again.");
-            } finally {
-                responsePending = false;
-                updateSendButton();
-            }
-        }, 350);
-    }
-
-    summarizeButton.addEventListener("click", summarizeSelectedDocuments);
-    documentSelect.addEventListener("change", updateSuggestions);
-    input.addEventListener("input", updateSendButton);
-    questionForm.addEventListener("submit", sendMessage);
-    clearButton.addEventListener("click", function () {
-        if (responsePending)
-            return;
-
-        chat.replaceChildren();
-        appendMessage(
-            "ai-message",
-            documents.length
-                ? "Chat cleared. Ask me about your selected study PDF."
-                : "Chat cleared. Add a study PDF to ask questions about your notes."
-        );
-    });
-
-    updateSuggestions();
-    input.focus();
 }
 
 
@@ -2610,13 +2310,22 @@ const pages = {
     schedule:  openSchedule,
     calendar:  openCalendar,
     profile:   openProfile,
-    ai:        openAI,
     timer:     openTimer,
     logout:    openLogout
 };
 
 
 function navigateTo(page, options) {
+    if (page === "ai") {
+        const params = new URLSearchParams();
+        if (options?.subjectId !== undefined)
+            params.set("subjectId", String(options.subjectId));
+        if (options?.documentId !== undefined)
+            params.set("documentId", String(options.documentId));
+        const query = params.toString();
+        window.location.href = `ai%20assistent.html${query ? `?${query}` : ""}`;
+        return;
+    }
 
     const renderPage = pages[page];
 
@@ -2652,7 +2361,7 @@ function navigateTo(page, options) {
     }
 
     currentDashboardPage = page;
-    if (["dashboard", "subjects", "reports"].includes(page)) {
+    if (["dashboard", "subjects", "reports", "schedule"].includes(page)) {
         refreshDashboardData().then(() => {
             if (currentDashboardPage === page) {
                 renderPage(options);

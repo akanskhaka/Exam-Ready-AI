@@ -1,5 +1,3 @@
-const API_URL = "http://127.0.0.1:5002/api/auth/login";
-
 const loginForm = document.getElementById("loginForm");
 const emailInput = document.getElementById("email");
 const passwordInput = document.getElementById("password");
@@ -34,23 +32,13 @@ loginForm.addEventListener("submit", async function (event) {
     submitButton.disabled = true;
 
     try {
-        const response = await fetch(API_URL, {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ email, password })
+        const result = await examReadyApi.postPublic("/auth/login", {
+            email,
+            password
         });
 
-        let result;
-        try {
-            result = await response.json();
-        } catch (error) {
-            console.error("Could not read the login response:", error);
-            statusMessage.textContent = "The server returned an invalid response. Please try again.";
-            return;
-        }
-
-        if (!response.ok) {
-            statusMessage.textContent = result.message || "Login failed. Please try again.";
+        if (!result.token || !result.user || result.user.id == null || !result.user.name) {
+            statusMessage.textContent = "The server returned an incomplete login response. Please try again.";
             return;
         }
 
@@ -68,9 +56,13 @@ loginForm.addEventListener("submit", async function (event) {
         statusMessage.textContent = "Login successful!";
         window.location.replace("./dashboard.html");
     } catch (error) {
-        console.error("Could not reach the login service:", error);
-        statusMessage.textContent =
-            "Could not connect to the server. Make sure the backend is running and try again.";
+        if (error.status) {
+            statusMessage.textContent = error.message || "Login failed. Please try again.";
+        } else {
+            console.error("Could not reach the login service:", error);
+            statusMessage.textContent =
+                "Could not connect to the server. Make sure the backend is running and try again.";
+        }
     } finally {
         submitButton.disabled = false;
     }

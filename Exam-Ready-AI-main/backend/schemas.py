@@ -2,7 +2,6 @@
 # ==========================================
 # SUBJECT SCHEMA
 # ==========================================
-
 def subject_schema(subject):
     return {
         "id": subject.id,
@@ -17,12 +16,9 @@ def subject_schema(subject):
             if subject.created_at else None
         )
     }
-
-
 # ==========================================
 # TOPIC SCHEMA
 # ==========================================
-
 def topic_schema(topic):
     return {
         "id": topic.id,
@@ -33,7 +29,6 @@ def topic_schema(topic):
         "status": topic.status,
         "mastery": topic.mastery
     }
-
 
 # ==========================================
 # SCHEDULE SCHEMA
@@ -56,12 +51,9 @@ def schedule_schema(schedule):
         ),
         "status": schedule.status
     }
-
-
 # ==========================================
 # REVISION SCHEMA
 # ==========================================
-
 def revision_schema(revision):
     return {
         "id": revision.id,
@@ -75,12 +67,9 @@ def revision_schema(revision):
         "notes": revision.notes,
         "status": revision.status
     }
-
-
 # ==========================================
 # CALENDAR SCHEMA
 # ==========================================
-
 def calendar_schema(event):
     return {
         "id": event.id,

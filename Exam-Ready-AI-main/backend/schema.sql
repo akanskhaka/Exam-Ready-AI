@@ -35,6 +35,51 @@ CREATE TABLE IF NOT EXISTS topics (
         FOREIGN KEY (subject_id) REFERENCES subjects (id)
 );
 
+CREATE TABLE IF NOT EXISTS schedules (
+    id INT NOT NULL AUTO_INCREMENT PRIMARY KEY,
+    user_id INT NOT NULL,
+    subject_id INT NULL,
+    title VARCHAR(200) NOT NULL,
+    description TEXT NULL,
+    start_time DATETIME NOT NULL,
+    end_time DATETIME NULL,
+    status VARCHAR(30) NOT NULL DEFAULT 'pending',
+    CONSTRAINT fk_schedules_user
+        FOREIGN KEY (user_id) REFERENCES users (user_id),
+    CONSTRAINT fk_schedules_subject
+        FOREIGN KEY (subject_id) REFERENCES subjects (id)
+);
+
+CREATE TABLE IF NOT EXISTS revisions (
+    id INT NOT NULL AUTO_INCREMENT PRIMARY KEY,
+    user_id INT NOT NULL,
+    subject_id INT NOT NULL,
+    topic VARCHAR(200) NOT NULL,
+    revision_date DATE NOT NULL,
+    notes TEXT NULL,
+    status VARCHAR(30) NOT NULL DEFAULT 'pending',
+    CONSTRAINT fk_revisions_user
+        FOREIGN KEY (user_id) REFERENCES users (user_id),
+    CONSTRAINT fk_revisions_subject
+        FOREIGN KEY (subject_id) REFERENCES subjects (id)
+);
+
+CREATE TABLE IF NOT EXISTS exams (
+    id INT NOT NULL AUTO_INCREMENT PRIMARY KEY,
+    user_id INT NOT NULL,
+    subject_id INT NULL,
+    exam_name VARCHAR(200) NOT NULL,
+    exam_date DATE NOT NULL,
+    total_marks FLOAT NOT NULL DEFAULT 100,
+    internal_marks FLOAT NOT NULL DEFAULT 0,
+    previous_marks FLOAT NOT NULL DEFAULT 0,
+    contents TEXT NULL,
+    CONSTRAINT fk_exams_user
+        FOREIGN KEY (user_id) REFERENCES users (user_id),
+    CONSTRAINT fk_exams_subject
+        FOREIGN KEY (subject_id) REFERENCES subjects (id)
+);
+
 CREATE TABLE IF NOT EXISTS calendar_events (
     id INT NOT NULL AUTO_INCREMENT PRIMARY KEY,
     user_id INT NOT NULL,

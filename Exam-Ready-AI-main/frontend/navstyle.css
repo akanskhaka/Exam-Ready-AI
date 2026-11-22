@@ -757,244 +757,6 @@ body {
 }
 
 
-/* =========================================
-   AI ASSISTANT
-========================================= */
-
-.ai-container {
-
-    background: white;
-
-    padding: 25px;
-
-    border-radius: 15px;
-
-    max-width: 850px;
-
-    box-shadow:
-        0 5px 20px
-        rgba(0, 0, 0, 0.05);
-}
-
-
-.chat-box {
-
-    height: 400px;
-
-    overflow-y: auto;
-
-    background: #f6f7fb;
-
-    padding: 20px;
-
-    border-radius: 12px;
-
-    margin: 20px 0;
-}
-
-
-.message {
-
-    padding: 12px 16px;
-
-    border-radius: 10px;
-
-    margin-bottom: 12px;
-
-    max-width: 75%;
-
-    line-height: 1.5;
-}
-
-
-.ai-message {
-
-    background: #eceaff;
-}
-
-
-.user-message {
-
-    background: #6c63ff;
-
-    color: white;
-
-    margin-left: auto;
-}
-
-.ai-message {
-    white-space: pre-line;
-}
-
-.ai-document-note {
-    margin: 10px 0 16px;
-    color: #777;
-    font-size: 13px;
-    line-height: 1.5;
-}
-
-.ai-document-controls {
-    display: flex;
-    flex-wrap: wrap;
-    align-items: center;
-    gap: 10px;
-}
-
-.ai-document-controls label {
-    font-weight: 600;
-}
-
-.ai-document-controls select,
-.ai-document-controls button {
-    min-height: 40px;
-    padding: 8px 12px;
-    border: 1px solid #ddd;
-    border-radius: 8px;
-    font: inherit;
-}
-
-.ai-document-controls select {
-    flex: 1;
-    min-width: 180px;
-    background: #fff;
-}
-
-.ai-document-controls button {
-    border: 0;
-    color: #fff;
-    background: #6c63ff;
-    cursor: pointer;
-}
-
-.ai-document-controls button:disabled {
-    opacity: .55;
-    cursor: not-allowed;
-}
-
-.ai-document-controls button:not(:disabled):hover {
-    background: #574fd6;
-}
-
-.ai-document-controls .ai-clear-btn {
-    border: 1px solid #ddd;
-    color: #555;
-    background: #fff;
-}
-
-.ai-document-controls .ai-clear-btn:hover {
-    background: #f5f5f8;
-}
-
-.ai-suggestions {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 8px;
-    margin-top: 16px;
-}
-
-.ai-suggestion {
-    padding: 8px 12px;
-    border: 1px solid #dcd7f7;
-    border-radius: 999px;
-    color: #574fd6;
-    background: #fff;
-    font: inherit;
-    font-size: 13px;
-    cursor: pointer;
-    transition: background-color 160ms ease, border-color 160ms ease;
-}
-
-.ai-suggestion:hover,
-.ai-suggestion:focus-visible {
-    border-color: #6c63ff;
-    background: #f3f1ff;
-}
-
-.ai-typing {
-    color: #655b78;
-    animation: ai-pulse 900ms ease-in-out infinite alternate;
-}
-
-@keyframes ai-pulse {
-    from { opacity: .55; }
-    to { opacity: 1; }
-}
-
-
-.ai-input {
-
-    display: flex;
-
-    align-items: stretch;
-
-    gap: 10px;
-}
-
-
-.ai-input input {
-
-    flex: 1;
-
-    min-width: 0;
-
-    padding: 14px;
-
-    border: 1px solid #ddd;
-
-    border-radius: 8px;
-
-    outline: none;
-}
-
-
-.ai-input button {
-
-    display: inline-flex;
-
-    align-items: center;
-
-    gap: 8px;
-
-    border: none;
-
-    background: #6c63ff;
-
-    color: white;
-
-    padding: 0 20px;
-
-    border-radius: 8px;
-
-    cursor: pointer;
-}
-
-.ai-input button:disabled {
-    opacity: .55;
-    cursor: not-allowed;
-}
-
-@media (max-width: 600px) {
-    .ai-container {
-        padding: 20px;
-    }
-
-    .ai-document-controls {
-        align-items: stretch;
-    }
-
-    .ai-document-controls label {
-        width: 100%;
-    }
-
-    .ai-document-controls select {
-        min-width: 0;
-    }
-
-    .ai-input button span {
-        display: none;
-    }
-}
-
 .report-quiz-history {
     margin-top: 20px;
 }
@@ -1895,7 +1657,6 @@ body {
     .card,
     .action-card,
     .content-box,
-    .ai-container,
     .subject-container,
     .profile-container,
     .timer-container {
@@ -1966,7 +1727,7 @@ body {
     }
 
     .action-card button,
-    .ai-input button,
+
     .save-btn,
     .timer-buttons button {
         color: #fff;
@@ -1985,19 +1746,6 @@ body {
         background: linear-gradient(90deg, var(--pink), var(--lavender));
     }
 
-    .chat-box {
-        background: #faf7fc;
-    }
-
-    .ai-message {
-        background: #f1eafa;
-    }
-
-    .user-message {
-        background: var(--lavender-deep);
-    }
-
-    .ai-input input:focus,
     .add-subject input:focus,
     .profile-form input:focus {
         border-color: #544662;

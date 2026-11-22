@@ -4,7 +4,7 @@ from flask import Blueprint, request, jsonify
 from flask_jwt_extended import jwt_required, get_jwt_identity
 
 from database import db
-from models import CalendarEvent, QuizAttempt, Subject, Topic
+from models import CalendarEvent, Exam, QuizAttempt, Revision, Schedule, Subject, Topic
 from schemas import subject_schema, topic_schema
 
 subjects_bp = Blueprint(
@@ -98,6 +98,17 @@ def delete_subject(subject_id):
 
     CalendarEvent.query.filter_by(subject_id=subject.id).update(
         {CalendarEvent.subject_id: None},
+        synchronize_session=False
+    )
+    Exam.query.filter_by(subject_id=subject.id).update(
+        {Exam.subject_id: None},
+        synchronize_session=False
+    )
+    Schedule.query.filter_by(subject_id=subject.id).update(
+        {Schedule.subject_id: None},
+        synchronize_session=False
+    )
+    Revision.query.filter_by(subject_id=subject.id).delete(
         synchronize_session=False
     )
     QuizAttempt.query.filter_by(subject_id=subject.id).update(

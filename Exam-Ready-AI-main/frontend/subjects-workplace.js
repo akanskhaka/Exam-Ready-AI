@@ -731,7 +731,7 @@
                     }
 
                     if (button.dataset.shortcut === "ai") {
-                        openAI({
+                        navigateTo("ai", {
                             subjectId: subject.id,
                             documentId: doc?.id
                         });
@@ -1711,30 +1711,41 @@ ${safe(summarizePdf(doc))}
         `;
 
         panel.querySelectorAll("[data-revise]").forEach(btn => {
-            btn.addEventListener("click", () => {
+            btn.addEventListener("click", async () => {
                 const topic = subject.topics.find(
                     t => String(t.id) === btn.dataset.revise
                 );
 
                 if (!topic) return;
 
-                topic.lastRevised = new Date().toISOString().slice(0, 10);
-                topic.needsRevision = false;
+                btn.disabled = true;
+                try {
+                    const revisionDate = new Date().toISOString().slice(0, 10);
+                    const revision = await examReadyApi.post("/revisions", {
+                        subject_id: subject.id,
+                        topic: topic.name,
+                        revision_date: revisionDate
+                    });
 
-                topic.revisionCount =
-                    (Number(topic.revisionCount) || 0) + 1;
+                    topic.lastRevised = revision.revision_date;
+                    topic.needsRevision = false;
+                    topic.revisionCount =
+                        (Number(topic.revisionCount) || 0) + 1;
+                    studentData.revisions.push({
+                        id: revision.id,
+                        subject: subject.name,
+                        topic: revision.topic,
+                        date: revision.revision_date,
+                        topicId: topic.id
+                    });
 
-                studentData.revisions.push({
-                    id: id(),
-                    subject: subject.name,
-                    topic: topic.name,
-                    date: topic.lastRevised,
-                    topicId: topic.id
-                });
-
-                persist();
-
-                renderTab(subject, "revision", subjectStats(subject));
+                    persist();
+                    renderTab(subject, "revision", subjectStats(subject));
+                } catch (error) {
+                    console.error("Could not save revision:", error);
+                    window.alert(`Could not save this revision: ${error.message}`);
+                    btn.disabled = false;
+                }
             });
         });
     }

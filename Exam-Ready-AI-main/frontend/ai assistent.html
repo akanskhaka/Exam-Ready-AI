@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Assistant | ExamReadyAI</title>
+    <link rel="stylesheet"
+          href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+    <link rel="stylesheet" href="navstyle.css">
+    <link rel="stylesheet" href="ai%20assistent.css">
+</head>
+<body class="ai-page">
+    <main class="ai-page-shell">
+        <header class="ai-page-header">
+            <div>
+                <a class="ai-back-link" href="dashboard.html">
+                    <i class="fa-solid fa-arrow-left"></i>
+                    Back to Dashboard
+                </a>
+                <h1>AI Study Assistant</h1>
+            </div>
+        </header>
+
+        <section class="ai-container">
+            <div class="ai-status-row">
+                <p class="ai-document-note">
+                    Select study text to ask focused questions or generate an exam-ready summary.
+                </p>
+                <span id="aiConnectionStatus" class="ai-status">Checking AI</span>
+            </div>
+
+            <div class="ai-document-controls">
+                <label for="aiDocumentSelect">Use study PDF</label>
+                <select id="aiDocumentSelect">
+                    <option value="">Choose a PDF</option>
+                    <option value="all">All uploaded PDFs</option>
+                </select>
+                <button type="button" id="summarizePDF" disabled>Summarize PDF</button>
+                <button type="button" id="clearAIChat" class="ai-clear-btn">Clear chat</button>
+            </div>
+
+            <div class="ai-suggestion-heading">
+                <span>Try asking</span>
+                <button type="button" id="shuffleSuggestions" aria-label="Show different suggestions">
+                    <i class="fa-solid fa-shuffle"></i>
+                </button>
+            </div>
+            <div id="aiSuggestions" class="ai-suggestions" aria-label="Suggested questions"></div>
+
+            <div class="chat-box" id="chatBox" role="log" aria-live="polite" aria-relevant="additions">
+                <div class="message ai-message">
+                    Hello! Select a PDF to ask questions or create a summary.
+                </div>
+            </div>
+
+            <form class="ai-input" id="aiQuestionForm">
+                <input id="aiInput" type="text" maxlength="500"
+                       aria-label="Your question" placeholder="Ask a question..." autocomplete="off">
+                <span id="aiCharacterCount" class="ai-character-count">0/500</span>
+                <button type="submit" id="sendAI" disabled>
+                    <i class="fa-solid fa-paper-plane"></i>
+                    <span>Send</span>
+                </button>
+            </form>
+        </section>
+    </main>
+
+    <script src="api.js"></script>
+    <script src="ai%20assistent.js"></script>
+</body>
+</html>

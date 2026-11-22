@@ -1,5 +1,3 @@
-const API_URL = "http://127.0.0.1:5002/api/auth/register";
-
 const registrationForm = document.getElementById("registrationForm");
 const nameInput = document.getElementById("name");
 const emailInput = document.getElementById("email");
@@ -45,25 +43,11 @@ registrationForm.addEventListener("submit", async function (event) {
     submitButton.textContent = "REGISTERING...";
 
     try {
-        const response = await fetch(API_URL, {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ name, email, password })
+        await examReadyApi.postPublic("/auth/register", {
+            name,
+            email,
+            password
         });
-
-        let result;
-        try {
-            result = await response.json();
-        } catch (error) {
-            console.error("Could not read the registration response:", error);
-            message.textContent = "The server returned an invalid response. Please try again.";
-            return;
-        }
-
-        if (!response.ok) {
-            message.textContent = result.message || "Registration failed. Please try again.";
-            return;
-        }
 
         message.className = "success";
         message.textContent = "Registration successful. Redirecting to login...";
@@ -71,9 +55,13 @@ registrationForm.addEventListener("submit", async function (event) {
             window.location.replace("./login.html");
         }, 1000);
     } catch (error) {
-        console.error("Could not reach the registration service:", error);
-        message.textContent =
-            "Could not connect to the server. Make sure the backend is running and try again.";
+        if (error.status) {
+            message.textContent = error.message || "Registration failed. Please try again.";
+        } else {
+            console.error("Could not reach the registration service:", error);
+            message.textContent =
+                "Could not connect to the server. Make sure the backend is running and try again.";
+        }
     } finally {
         submitButton.disabled = false;
         submitButton.textContent = "CREATE ACCOUNT";

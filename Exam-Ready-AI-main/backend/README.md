@@ -6,21 +6,27 @@ Flask API. The API hashes the password before saving the account in `users`.
 
 1. Start your local MySQL Server and connect to it in MySQL Workbench.
 2. Open `schema.sql` in Workbench and execute it to create the `studyai_db`
-   database and the user, subjects, topics, calendar, quiz, and report tables.
+   database and the user, subjects, topics, schedules, revisions, exams,
+   calendar, quiz, and report tables.
 3. Create `backend/.env` using `.env.example` as a template. Set the MySQL
    username and password for your server. Keep `.env` private and do not commit
    it.
-4. From the `backend` directory, start the API with `python main.py`. It listens
-   on `http://127.0.0.1:5002`. On startup, Flask creates any missing feature
-   tables without replacing existing tables or registration records.
-5. Serve the `frontend` directory with a local static web server, then open
-   `register.html` or `registration.html`. Both forms use the same API. After
-   registration, use the same credentials to log in.
+4. Activate the Python environment that has the backend dependencies installed,
+   then start the API from the `backend` directory with `python main.py`. It
+   listens on `http://127.0.0.1:5002`. On startup, Flask creates any missing
+   feature tables without replacing existing tables or registration records.
+5. Serve the `frontend` directory with a local static web server rather than
+   opening the HTML files directly. The shared API client in `../frontend/api.js`
+   sends login and registration requests to the backend; update its
+   `API_BASE_URL` if the backend is hosted at a different address. Then open
+   `login.html`, `register.html`, or `registration.html`. After registration,
+   use the same credentials to log in.
 
-Calendar events, subjects and topics, and quiz attempts are stored with the
-authenticated student's ID. New records appear in Workbench under the
-`studyai_db` schema. The stored `users.password` value is a one-way hash, not
-the student's original password.
+Calendar events, exam and revision schedules, subjects and topics, and quiz
+attempts are stored with the authenticated student's ID. Quiz reports read
+their history from those saved attempts. New records appear in Workbench under
+the `studyai_db` schema. The stored `users.password` value is a one-way hash,
+not the student's original password.
 
 Use these Workbench queries to inspect saved records:
 
