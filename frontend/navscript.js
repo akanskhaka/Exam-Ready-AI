@@ -8,10 +8,18 @@ let studentData = {
     quizzes: [],
     revisions: [],
     exams: [],
-    studyMinutes: 0
+    studyMinutes: 0,
+    studySeconds: 0,
+    pausedSeconds: 0,
+    timerSessions: []
 };
 
 let dataLoadError = null;
+let calendarEvents = [];
+let currentDashboardPage = "dashboard";
+let studentProfile = null;
+const MAX_PDF_TEXT_LENGTH = 150000;
+let pdfJsPromise = null;
 
 
 /* =========================================================
@@ -19,8 +27,11 @@ let dataLoadError = null;
 ========================================================= */
 
 let timerInterval = null;
+let pausedDisplayInterval = null;
 let timerSeconds = 25 * 60;
 let timerRunning = false;
+let timerPausedAt = null;
+let currentTimerSession = null;
 
 
 /* =========================================================
@@ -60,6 +71,7 @@ function saveData() {
             "studentDashboardData",
             JSON.stringify(studentData)
         );
+        return true;
     } catch (error) {
         dataLoadError = "Dashboard changes could not be saved in this browser.";
         console.error(dataLoadError, error);
@@ -71,6 +83,7 @@ function saveData() {
             notice.textContent = dataLoadError;
             contentArea.prepend(notice);
         }
+        return false;
     }
 }
 
@@ -112,6 +125,21 @@ function loadData() {
                                     name: typeof topic.name === "string" ? topic.name : "",
                                     completed: topic.completed === true
                                 }))
+                            : [],
+                        documents: Array.isArray(subject.documents)
+                            ? subject.documents
+                                .filter(document => document && typeof document === "object" &&
+                                    !Array.isArray(document) &&
+                                    typeof document.name === "string" &&
+                                    Array.isArray(document.pages))
+                                .map(document => ({
+                                    ...document,
+                                    id: document.id || `${Date.now()}-${Math.random()}`,
+                                    name: document.name,
+                                    pages: document.pages
+                                        .filter(page => typeof page === "string")
+                                        .map(page => page.slice(0, MAX_PDF_TEXT_LENGTH))
+                                }))
                             : []
                     }))
                 : [],
@@ -120,7 +148,18 @@ function loadData() {
             exams: Array.isArray(parsedData.exams) ? parsedData.exams : [],
             studyMinutes: Number.isFinite(parsedData.studyMinutes) && parsedData.studyMinutes >= 0
                 ? parsedData.studyMinutes
-                : 0
+                : 0,
+            studySeconds: Number.isFinite(parsedData.studySeconds) && parsedData.studySeconds >= 0
+                ? parsedData.studySeconds
+                : Math.max(0, Number(parsedData.studyMinutes) || 0) * 60,
+            pausedSeconds: Number.isFinite(parsedData.pausedSeconds) && parsedData.pausedSeconds >= 0
+                ? parsedData.pausedSeconds
+                : 0,
+            timerSessions: Array.isArray(parsedData.timerSessions)
+                ? parsedData.timerSessions.filter(session =>
+                    session && typeof session === "object" && !Array.isArray(session)
+                )
+                : []
         };
     } catch (error) {
         console.error("Could not load saved dashboard data:", error);
@@ -130,7 +169,10 @@ function loadData() {
             quizzes: [],
             revisions: [],
             exams: [],
-            studyMinutes: 0
+            studyMinutes: 0,
+            studySeconds: 0,
+            pausedSeconds: 0,
+            timerSessions: []
         };
     }
 }
@@ -161,12 +203,95 @@ function applyProfileName() {
     const profile = getProfile();
     if (topbarName) {
         topbarName.textContent =
-            profile.name || sessionStorage.getItem("userName") || "Student";
+            (studentProfile && studentProfile.name) ||
+            profile.name ||
+            sessionStorage.getItem("userName") ||
+            "Student";
     }
 }
 
 
 loadData();
+
+async function refreshDashboardData() {
+    const [subjects, report, profile, exams, revisions] = await Promise.all([
+        examReadyApi.get("/subjects"),
+        examReadyApi.get("/reports/dashboard"),
+        examReadyApi.get("/students/profile"),
+        examReadyApi.get("/exams"),
+        examReadyApi.get("/revisions")
+    ]);
+
+    studentProfile = profile;
+    applyProfileName();
+
+    const previousSubjects = studentData.subjects;
+    studentData.subjects = subjects.map(subject => {
+        const previous = previousSubjects.find(item =>
+            String(item.id) === String(subject.id) ||
+            (typeof item.name === "string" &&
+                item.name.toLowerCase() === subject.name.toLowerCase())
+        );
+        return {
+            ...subject,
+            topics: (subject.topics || []).map(topic => ({
+                ...topic,
+                revisionCount: 0,
+                lastRevised: null,
+                studyMinutes: 0,
+                needsRevision: false
+            })),
+            documents: previous ? previous.documents || [] : []
+        };
+    });
+    studentData.quizzes = (report.quiz_attempts || []).map(attempt => ({
+        id: attempt.id,
+        name: attempt.name,
+        percentage: attempt.percentage,
+        date: attempt.attempted_at,
+        subjectId: attempt.subject_id,
+        subjectName: attempt.subject_name || "General quiz",
+        correctAnswers: attempt.correct_answers,
+        totalQuestions: attempt.total_questions
+    }));
+    studentData.exams = exams.map(exam => ({
+        id: exam.id,
+        subject: exam.exam_name,
+        topic: exam.contents || "",
+        date: exam.exam_date,
+        subjectId: exam.subject_id
+    }));
+    studentData.revisions = revisions.map(revision => {
+        const subject = studentData.subjects.find(
+            item => String(item.id) === String(revision.subject_id)
+        );
+        return {
+            id: revision.id,
+            subject: subject ? subject.name : "Subject",
+            topic: revision.topic,
+            date: revision.revision_date
+        };
+    });
+    saveData();
+}
+
+function showDashboardApiError(error) {
+    console.error("Could not load student data from the server:", error);
+    if (error.status === 401 || error.status === 422) {
+        sessionStorage.removeItem("accessToken");
+        sessionStorage.removeItem("userId");
+        sessionStorage.removeItem("isLoggedIn");
+        sessionStorage.removeItem("userName");
+        window.location.replace("./login.html");
+        return;
+    }
+
+    const notice = document.createElement("p");
+    notice.className = "content-box";
+    notice.setAttribute("role", "alert");
+    notice.textContent = `Could not load saved student data: ${error.message}`;
+    contentArea.prepend(notice);
+}
 
 
 /* =========================================================
@@ -182,17 +307,37 @@ function openDashboard() {
         "Track your actual study progress and academic activity.";
 
     const totalSubjects = studentData.subjects.length;
-    const totalTopics = getTotalTopics();
-    const completedTopics = getCompletedTopics();
-
-    const syllabusProgress =
-        totalTopics === 0
-            ? 0
-            : Math.round((completedTopics / totalTopics) * 100);
-
-    const quizCount = studentData.quizzes.length;
+    const studentName = studentProfile && studentProfile.name
+        ? studentProfile.name
+        : "Student";
     const studyHours = Math.floor(studentData.studyMinutes / 60);
     const studyMinutes = studentData.studyMinutes % 60;
+    const subjectProgress = studentData.subjects.map(subject => {
+        const topics = Array.isArray(subject.topics) ? subject.topics : [];
+        const completed = topics.filter(topic =>
+            topic.completed || topic.status === "completed"
+        ).length;
+
+        return {
+            name: subject.name || "Untitled subject",
+            completed,
+            total: topics.length,
+            percentage: topics.length
+                ? Math.round(completed / topics.length * 100)
+                : 0
+        };
+    });
+    const totalProgressTopics = subjectProgress.reduce(
+        (total, subject) => total + subject.total,
+        0
+    );
+    const completedProgressTopics = subjectProgress.reduce(
+        (total, subject) => total + subject.completed,
+        0
+    );
+    const overallStudyProgress = totalProgressTopics
+        ? Math.round(completedProgressTopics / totalProgressTopics * 100)
+        : 0;
 
     contentArea.innerHTML = `
 
@@ -205,9 +350,9 @@ function openDashboard() {
         <!-- WELCOME -->
         <div class="welcome-card">
             <div>
-                <h2>Welcome to your Dashboard</h2>
+                <h2>Welcome, ${escapeHtml(studentName)}</h2>
                 <p>
-                    Add your subjects, topics, quizzes and study sessions.
+                    Add your subjects, topics and study sessions.
                     Your dashboard will update automatically.
                 </p>
             </div>
@@ -222,26 +367,54 @@ function openDashboard() {
                 <p>${totalSubjects} Added</p>
             </div>
 
-            <div class="card" data-nav="subjects" tabindex="0" role="link">
-                <i class="fa-solid fa-list-check"></i>
-                <h3>Syllabus</h3>
-                <p>${syllabusProgress}% Completed</p>
-                <div class="progress-bar">
-                    <div class="progress" style="width:${syllabusProgress}%"></div>
-                </div>
-            </div>
-
-            <div class="card" data-nav="reports" tabindex="0" role="link">
-                <i class="fa-solid fa-pen-to-square"></i>
-                <h3>Quizzes</h3>
-                <p>${quizCount} Completed</p>
-            </div>
-
             <div class="card" data-nav="timer" tabindex="0" role="link">
                 <i class="fa-solid fa-clock"></i>
                 <h3>Study Time</h3>
                 <p>${studyHours}h ${studyMinutes}m</p>
             </div>
+
+            <a class="card" href="quiz.html">
+                <i class="fa-solid fa-circle-question"></i>
+                <h3>Quiz</h3>
+                <p>Practice and track your quiz scores</p>
+            </a>
+
+            <section class="card study-progress-card" aria-labelledby="study-progress-heading">
+                <i class="fa-solid fa-chart-simple" aria-hidden="true"></i>
+                <h3 id="study-progress-heading">Study Progress</h3>
+                <p>${overallStudyProgress}% overall · ${completedProgressTopics}/${totalProgressTopics} topics completed</p>
+                <div class="progress-bar"
+                     role="progressbar"
+                     aria-label="Overall study progress"
+                     aria-valuemin="0"
+                     aria-valuemax="100"
+                     aria-valuenow="${overallStudyProgress}">
+                    <div class="progress" style="width:${overallStudyProgress}%"></div>
+                </div>
+                <div class="study-progress-list">
+                    ${
+                        subjectProgress.length
+                            ? subjectProgress.map(subject => `
+                                <div class="study-progress-item">
+                                    <div class="study-progress-label">
+                                        <span>${escapeHtml(subject.name)}</span>
+                                        <strong>${subject.percentage}%</strong>
+                                    </div>
+                                    <div class="progress-bar"
+                                         role="progressbar"
+                                         aria-label="${escapeHtml(subject.name)} progress"
+                                         aria-valuemin="0"
+                                         aria-valuemax="100"
+                                         aria-valuenow="${subject.percentage}">
+                                        <div class="progress" style="width:${subject.percentage}%"></div>
+                                    </div>
+                                    <small>${subject.completed}/${subject.total} topics completed</small>
+                                </div>
+                            `).join("")
+                            : "<small>Add subjects to track your study progress.</small>"
+                    }
+                </div>
+            </section>
 
         </div>
 
@@ -249,13 +422,6 @@ function openDashboard() {
         <h2 class="section-heading">Quick Actions</h2>
 
         <div class="dashboard-actions">
-
-            <div class="action-card" data-action="ai">
-                <div class="action-icon"><i class="fa-solid fa-robot"></i></div>
-                <h3>AI Assistant</h3>
-                <p>Ask questions and get study guidance.</p>
-                <button type="button">Open Assistant</button>
-            </div>
 
             <div class="action-card" data-action="calendar">
                 <div class="action-icon"><i class="fa-solid fa-calendar"></i></div>
@@ -344,7 +510,7 @@ function openSubjects() {
 
     pageTitle.textContent = "Subjects";
     pageDescription.textContent =
-        "Add subjects, topics and update syllabus completion.";
+        "Add a subject first, then upload its study PDFs alongside your topics.";
 
     contentArea.innerHTML = `
         <div class="subject-container">
@@ -390,7 +556,8 @@ function addSubject() {
     studentData.subjects.push({
         id: Date.now(),
         name: name,
-        topics: []
+        topics: [],
+        documents: []
     });
 
     saveData();
@@ -454,6 +621,18 @@ function renderSubjects() {
             <button type="button" class="add-topic-btn">Add Topic</button>
 
             <div class="topic-list"></div>
+
+            <section class="subject-documents">
+                <h4>Study PDFs</h4>
+                <label for="subjectPdf${studentData.subjects.indexOf(subject)}">
+                    Add PDF files (no file-size limit)
+                </label>
+                <input id="subjectPdf${studentData.subjects.indexOf(subject)}"
+                       type="file" class="subject-pdf-input"
+                       accept=".pdf,application/pdf" multiple>
+                <p class="subject-pdf-status" role="status" aria-live="polite"></p>
+                <div class="subject-pdf-list"></div>
+            </section>
         `;
 
         list.appendChild(card);
@@ -462,8 +641,12 @@ function renderSubjects() {
         const addTopicButton = card.querySelector(".add-topic-btn");
         const topicList = card.querySelector(".topic-list");
         const deleteSubjectButton = card.querySelector(".delete-subject-btn");
+        const pdfInput = card.querySelector(".subject-pdf-input");
+        const pdfStatus = card.querySelector(".subject-pdf-status");
+        const pdfList = card.querySelector(".subject-pdf-list");
 
         renderTopics(subject, topicList);
+        renderSubjectDocuments(subject, pdfList);
 
         deleteSubjectButton.addEventListener("click", function () {
             if (!window.confirm(`Delete "${subject.name}" and all its topics?`))
@@ -501,6 +684,166 @@ function renderSubjects() {
         topicInput.addEventListener("keypress", function (event) {
             if (event.key === "Enter") addTopic();
         });
+
+        pdfInput.addEventListener("change", async function () {
+            const files = Array.from(this.files || []);
+            this.value = "";
+
+            if (files.length === 0)
+                return;
+
+            this.disabled = true;
+            pdfStatus.textContent = "Reading PDF files in this browser...";
+
+            let addedCount = 0;
+            const errors = [];
+
+            for (const file of files) {
+                try {
+                    if (!file.name.toLowerCase().endsWith(".pdf") &&
+                        file.type !== "application/pdf") {
+                        throw new Error("Choose a PDF file.");
+                    }
+
+                    const documentData = await extractPdfText(file);
+                    subject.documents = Array.isArray(subject.documents)
+                        ? subject.documents
+                        : [];
+                    subject.documents.push(documentData);
+
+                    if (!saveData()) {
+                        subject.documents.pop();
+                        errors.push(`${file.name}: ${dataLoadError || "could not save the PDF text."}`);
+                        break;
+                    }
+
+                    addedCount++;
+                } catch (error) {
+                    console.error(`Could not read PDF "${file.name}":`, error);
+                    errors.push(`${file.name}: ${error.message}`);
+                }
+            }
+
+            renderSubjects();
+
+            const status = document.querySelectorAll(".subject-pdf-status")[
+                studentData.subjects.indexOf(subject)
+            ];
+            if (status) {
+                status.textContent = [
+                    addedCount ? `${addedCount} PDF${addedCount === 1 ? "" : "s"} added.` : "",
+                    ...errors
+                ].filter(Boolean).join(" ");
+            }
+        });
+    });
+}
+
+
+async function extractPdfText(file) {
+    const pdfjs = await getPdfJs();
+    const loadingTask = pdfjs.getDocument({ data: await file.arrayBuffer() });
+    const pages = [];
+    let textLength = 0;
+
+    try {
+        const pdf = await loadingTask.promise;
+
+        for (let pageNumber = 1; pageNumber <= pdf.numPages; pageNumber++) {
+            const page = await pdf.getPage(pageNumber);
+            const content = await page.getTextContent();
+            const pageText = content.items
+                .map(item => typeof item.str === "string" ? item.str : "")
+                .join(" ")
+                .replace(/\s+/g, " ")
+                .trim();
+
+            textLength += pageText.length;
+            if (textLength > MAX_PDF_TEXT_LENGTH) {
+                throw new Error("This PDF contains too much text. Split it into smaller files (up to 150,000 characters each).");
+            }
+
+            pages.push(pageText);
+        }
+    } finally {
+        await loadingTask.destroy();
+    }
+
+    if (!pages.some(page => page.length > 0)) {
+        throw new Error("No selectable text was found. Scanned PDFs need OCR before they can be used.");
+    }
+
+    return {
+        id: `${Date.now()}-${Math.random().toString(36).slice(2)}`,
+        name: file.name,
+        pages
+    };
+}
+
+
+function getPdfJs() {
+    if (!pdfJsPromise) {
+        pdfJsPromise = import("https://cdn.jsdelivr.net/npm/pdfjs-dist@6.5.438/build/pdf.mjs")
+            .then(pdfjs => {
+                pdfjs.GlobalWorkerOptions.workerSrc =
+                    "https://cdn.jsdelivr.net/npm/pdfjs-dist@6.5.438/build/pdf.worker.mjs";
+                return pdfjs;
+            })
+            .catch(error => {
+                pdfJsPromise = null;
+                console.error("Could not load the PDF reader:", error);
+                throw new Error("The PDF reader could not be loaded. Check your internet connection and try again.");
+            });
+    }
+
+    return pdfJsPromise;
+}
+
+
+function renderSubjectDocuments(subject, container) {
+    container.innerHTML = "";
+
+    (Array.isArray(subject.documents) ? subject.documents : []).forEach(documentData => {
+        const row = document.createElement("div");
+        row.className = "subject-pdf-row";
+
+        const name = document.createElement("span");
+        name.className = "subject-pdf-name";
+        name.textContent = documentData.name;
+
+        const summarizeButton = document.createElement("button");
+        summarizeButton.type = "button";
+        summarizeButton.className = "subject-pdf-summary-btn";
+        summarizeButton.textContent = "Ask AI";
+        summarizeButton.addEventListener("click", () => {
+            navigateTo("ai", {
+                subjectId: subject.id,
+                documentId: documentData.id
+            });
+        });
+
+        const deleteButton = document.createElement("button");
+        deleteButton.type = "button";
+        deleteButton.className = "subject-pdf-delete-btn";
+        deleteButton.setAttribute("aria-label", `Remove ${documentData.name}`);
+        deleteButton.innerHTML = '<i class="fa-solid fa-trash" aria-hidden="true"></i>';
+        deleteButton.addEventListener("click", () => {
+            if (!window.confirm(`Remove "${documentData.name}" from this subject?`))
+                return;
+
+            const documentIndex = subject.documents.indexOf(documentData);
+            subject.documents.splice(documentIndex, 1);
+
+            if (!saveData()) {
+                subject.documents.splice(documentIndex, 0, documentData);
+                return;
+            }
+
+            renderSubjects();
+        });
+
+        row.append(name, summarizeButton, deleteButton);
+        container.appendChild(row);
     });
 }
 
@@ -563,22 +906,66 @@ function openReports() {
     clearTimer();
 
     pageTitle.textContent = "Reports";
-    pageDescription.textContent = "View syllabus and quiz performance.";
+    pageDescription.textContent = "Review your syllabus progress and previous quiz results.";
 
     const total = getTotalTopics();
     const completed = getCompletedTopics();
 
     const syllabus =
         total === 0 ? 0 : Math.round(completed / total * 100);
+    const quizRecords = studentData.quizzes
+        .filter(quiz => quiz && typeof quiz === "object")
+        .slice()
+        .reverse();
 
-    const averageQuiz =
-        studentData.quizzes.length === 0
-            ? 0
-            : Math.round(
-                studentData.quizzes.reduce(
-                    (sum, quiz) => sum + quiz.percentage, 0
-                ) / studentData.quizzes.length
-            );
+    const quizHistory = quizRecords.length
+        ? quizRecords.map(quiz => {
+            const score = Number(quiz.percentage);
+            const safeScore = Number.isFinite(score) ? Math.min(100, Math.max(0, score)) : 0;
+            const scoreColor = safeScore === 100
+                ? "#218653"
+                : safeScore >= 50
+                    ? "#e29124"
+                    : "#cf4650";
+            const subjectName = typeof quiz.subjectName === "string" && quiz.subjectName
+                ? quiz.subjectName
+                : "General quiz";
+            const sourceName = typeof quiz.sourceDocumentName === "string" &&
+                quiz.sourceDocumentName
+                ? ` · ${quiz.sourceDocumentName}`
+                : "";
+            const date = typeof quiz.date === "string" && quiz.date
+                ? new Date(quiz.date)
+                : null;
+            const dateLabel = date && !Number.isNaN(date.getTime())
+                ? date.toLocaleString()
+                : "";
+
+            return `
+                <article class="report-quiz-record">
+                    <div class="report-quiz-details">
+                        <strong>${escapeHtml(quiz.name || "Quiz")}</strong>
+                        <span>${escapeHtml(subjectName)}${escapeHtml(sourceName)}</span>
+                        ${dateLabel ? `<time datetime="${escapeHtml(quiz.date)}">${escapeHtml(dateLabel)}</time>` : ""}
+                    </div>
+                    <div class="report-quiz-chart-wrap">
+                        <div class="report-quiz-chart"
+                             style="--report-score: ${safeScore}; --report-score-color: ${scoreColor}"
+                             role="img"
+                             aria-label="${safeScore}% score; ${100 - safeScore}% remaining">
+                            <span>${escapeHtml(quiz.percentage)}%</span>
+                        </div>
+                    </div>
+                </article>
+            `;
+        }).join("")
+        : `<p class="report-quiz-empty">No quiz attempts saved yet. Your results will appear here after you complete a quiz.</p>`;
+    const averageScore = quizRecords.length
+        ? Math.round(quizRecords.reduce(
+            (sum, quiz) => sum + (Number(quiz.percentage) || 0),
+            0
+        ) / quizRecords.length)
+        : 0;
 
     contentArea.innerHTML = `
 
@@ -634,130 +1021,20 @@ function openReports() {
 
         </div>
 
-        <br>
-
-        <div class="content-box">
-
-            <h2>Quiz Report</h2>
-
-            <p>
-                Average Quiz Score:
-                <strong>${averageQuiz}%</strong>
-            </p>
-
-            <br>
-
-            <div class="add-subject">
-                <input type="text" id="quizName" placeholder="Quiz name">
-                <input type="number" id="quizScore" placeholder="Score %" min="0" max="100">
-                <button type="button" id="addQuiz">Add Quiz</button>
-            </div>
-
-            <div id="quizList"></div>
-
+        <div class="content-box report-quiz-history">
+            <h2>Previous Quiz Reports</h2>
+            <p>Every saved quiz attempt is shown here with its score and chart.</p>
+            <p><strong>${quizRecords.length}</strong> attempts ·
+               <strong>${averageScore}%</strong> average score</p>
+            <ul class="report-quiz-legend" aria-label="Quiz score chart colors">
+                <li><span class="report-legend-swatch report-legend-perfect"></span>100%: green</li>
+                <li><span class="report-legend-swatch report-legend-average"></span>50-99%: orange</li>
+                <li><span class="report-legend-swatch report-legend-low"></span>Under 50%: red</li>
+            </ul>
+            <div class="report-quiz-list">${quizHistory}</div>
         </div>
+
     `;
-
-    renderQuizzes();
-
-    document.getElementById("addQuiz").addEventListener("click", addQuiz);
-}
-
-
-function openQuiz() {
-
-    clearTimer();
-
-    pageTitle.textContent = "Quiz";
-    pageDescription.textContent = "Add and review your quiz scores.";
-
-    const averageQuiz =
-        studentData.quizzes.length === 0
-            ? 0
-            : Math.round(
-                studentData.quizzes.reduce(
-                    (sum, quiz) => sum + quiz.percentage, 0
-                ) / studentData.quizzes.length
-            );
-
-    contentArea.innerHTML = `
-        <div class="content-box">
-            <h2>Quiz Report</h2>
-            <p>Average Quiz Score: <strong>${averageQuiz}%</strong></p>
-            <br>
-            <div class="add-subject">
-                <input type="text" id="quizName" placeholder="Quiz name">
-                <input type="number" id="quizScore" placeholder="Score %" min="0" max="100">
-                <button type="button" id="addQuiz">Add Quiz</button>
-            </div>
-            <div id="quizList"></div>
-        </div>
-    `;
-
-    renderQuizzes();
-    document.getElementById("addQuiz").addEventListener("click", addQuiz);
-}
-
-
-/* =========================================================
-   QUIZ
-========================================================= */
-
-function addQuiz() {
-
-    const name = document.getElementById("quizName").value.trim();
-    const scoreText = document.getElementById("quizScore").value.trim();
-    const score = Number(scoreText);
-
-    if (!name || scoreText === "" || isNaN(score) || score < 0 || score > 100) {
-        alert("Enter a quiz name and score between 0 and 100.");
-        return;
-    }
-
-    studentData.quizzes.push({
-        name: name,
-        percentage: score
-    });
-
-    saveData();
-    const activeMenuLink = Array.from(menuLinks).find(link =>
-        link.classList.contains("active")
-    );
-    if (activeMenuLink && activeMenuLink.dataset.page === "quiz") {
-        openQuiz();
-    } else {
-        openReports();
-    }
-}
-
-
-/* =========================================================
-   RENDER QUIZZES
-========================================================= */
-
-function renderQuizzes() {
-
-    const list = document.getElementById("quizList");
-
-    if (!list)
-        return;
-
-    if (studentData.quizzes.length === 0) {
-        list.innerHTML = `<p>No quizzes added yet.</p>`;
-        return;
-    }
-
-    list.innerHTML = studentData.quizzes.map(quiz => `
-        <div style="
-            padding:12px;
-            margin-top:10px;
-            background:#f5f7fb;
-            border-radius:8px;
-        ">
-            <strong>${escapeHtml(quiz.name)}</strong>
-            - ${escapeHtml(quiz.percentage)}%
-        </div>
-    `).join("");
 }
 
 
@@ -770,18 +1047,36 @@ let calendarDate = new Date();
 calendarDate.setDate(1);
 
 let selectedCalendarDate = null;
+let calendarFocusDate = null;
+let editingCalendarEventId = null;
 
 
-function openCalendar() {
+async function openCalendar() {
 
     clearTimer();
 
     pageTitle.textContent = "Calendar";
     pageDescription.textContent = "Plan your revision sessions and exam dates.";
 
+    const focusDate = calendarFocusDate;
+    calendarFocusDate = null;
     selectedCalendarDate = null;
+    editingCalendarEventId = null;
+
+    contentArea.innerHTML = `<p class="content-box" role="status">Loading saved calendar events...</p>`;
+    try {
+        await refreshDashboardData();
+        calendarEvents = await examReadyApi.get("/calendar");
+    } catch (error) {
+        showDashboardApiError(error);
+        return;
+    }
 
     renderCalendar();
+
+    if (focusDate) {
+        selectCalendarDate(focusDate);
+    }
 }
 
 
@@ -874,19 +1169,37 @@ function renderCalendar() {
                     <label>Subject</label>
 
                     <select id="calendarSubject">
-                        <option value="">Select Subject</option>
+                        <option value="">No subject</option>
                         ${studentData.subjects.map(subject => `
-                            <option value="${escapeHtml(subject.name)}">
+                                <option value="${subject.id}">
                                 ${escapeHtml(subject.name)}
                             </option>
                         `).join("")}
                     </select>
 
-                    <label>Topic</label>
+                        <label for="calendarTopic">Event title</label>
 
-                    <input type="text" id="calendarTopic" placeholder="Enter topic / chapter">
+                        <input type="text" id="calendarTopic" maxlength="200"
+                               placeholder="Enter event title">
 
-                    <label>Event Type</label>
+                        <label for="calendarTime">Time</label>
+                        <input type="time" id="calendarTime">
+
+                        <label for="calendarDescription">Description</label>
+                        <textarea id="calendarDescription" rows="3"
+                                  placeholder="Add event details"></textarea>
+
+                        <label for="calendarReminder">Reminder</label>
+                        <select id="calendarReminder">
+                            <option value="">No reminder</option>
+                            <option value="5">5 minutes before</option>
+                            <option value="15">15 minutes before</option>
+                            <option value="30">30 minutes before</option>
+                            <option value="60">1 hour before</option>
+                            <option value="1440">1 day before</option>
+                        </select>
+
+                        <label>Event Type</label>
 
                     <select id="calendarEventType">
                         <option value="revision">Revision</option>
@@ -895,11 +1208,12 @@ function renderCalendar() {
 
                     <button type="button" id="saveCalendarEvent" class="calendar-save-btn">
                         <i class="fa-solid fa-plus"></i>
-                        Schedule Event
+                        Save Event
                     </button>
 
                 </div>
 
+                <div id="calendarSelectedEvents"></div>
             </div>
 
             <!-- LEGEND -->
@@ -1023,6 +1337,9 @@ function renderCalendarDays() {
 
         const examEvents =
             studentData.exams.filter(event => event.date === dateString);
+        const savedEvents = calendarEvents.filter(
+            event => event.event_date === dateString
+        );
 
         html += `
             <div class="calendar-day ${isToday ? "today" : ""}"
@@ -1031,7 +1348,7 @@ function renderCalendarDays() {
                 <span class="day-number">${day}</span>
 
                 <div class="day-events">
-                    ${renderDayEvents(revisionEvents, examEvents)}
+                    ${renderDayEvents(revisionEvents, examEvents, savedEvents)}
                 </div>
 
             </div>
@@ -1076,7 +1393,7 @@ function formatDate(year, month, day) {
 
 /* ---------- Events inside a date cell ---------- */
 
-function renderDayEvents(revisions, exams) {
+function renderDayEvents(revisions, exams, savedEvents) {
 
     let html = "";
 
@@ -1091,9 +1408,20 @@ function renderDayEvents(revisions, exams) {
 
     exams.forEach(event => {
         html += `
-            <div class="calendar-event exam-event">
+            <div class="calendar-event exam-event"
+                 title="Exam: ${escapeHtml(event.subject)}${event.topic ? ` - ${escapeHtml(event.topic)}` : ""}">
                 <i class="fa-solid fa-file-pen"></i>
                 ${escapeHtml(event.subject)}
+                ${event.topic ? `<span class="calendar-event-topic">${escapeHtml(event.topic)}</span>` : ""}
+            </div>
+        `;
+    });
+
+    savedEvents.forEach(event => {
+        html += `
+            <div class="calendar-event ${event.event_type === "exam" ? "exam-event" : "revision-event"}"
+                 title="${escapeHtml(event.title)}${event.event_time ? ` · ${escapeHtml(event.event_time)}` : ""}">
+                ${escapeHtml(event.title)}
             </div>
         `;
     });
@@ -1134,6 +1462,8 @@ function selectCalendarDate(date) {
         selected.classList.add("selected-date");
     }
 
+    renderSelectedCalendarEvents();
+
     panel.scrollIntoView({
         behavior: "smooth",
         block: "start"
@@ -1143,50 +1473,127 @@ function selectCalendarDate(date) {
 
 /* ---------- Save calendar event ---------- */
 
-function saveCalendarEvent() {
+function renderSelectedCalendarEvents() {
+    const container = document.getElementById("calendarSelectedEvents");
+    if (!container) return;
+
+    const selectedEvents = calendarEvents.filter(
+        event => event.event_date === selectedCalendarDate
+    );
+    if (!selectedEvents.length) {
+        container.innerHTML = "<p>No saved events for this date.</p>";
+        return;
+    }
+
+    container.innerHTML = `
+        <h3>Events for this date</h3>
+        ${selectedEvents.map(event => `
+            <article class="content-box">
+                <strong>${escapeHtml(event.title)}</strong>
+                <p>${escapeHtml(event.event_type)}${event.event_time ? ` · ${escapeHtml(event.event_time)}` : ""}</p>
+                ${event.description ? `<p>${escapeHtml(event.description)}</p>` : ""}
+                ${event.reminder_minutes !== null
+                    ? `<p>Reminder: ${escapeHtml(event.reminder_minutes)} minutes before</p>`
+                    : ""}
+                <button type="button" data-edit-calendar-event="${event.id}">Edit</button>
+                <button type="button" data-delete-calendar-event="${event.id}">Delete</button>
+            </article>
+        `).join("")}
+    `;
+
+    container.querySelectorAll("[data-edit-calendar-event]").forEach(button => {
+        button.addEventListener("click", () => {
+            const event = calendarEvents.find(
+                item => item.id === Number(button.dataset.editCalendarEvent)
+            );
+            if (!event) return;
+
+            editingCalendarEventId = event.id;
+            document.getElementById("calendarSubject").value =
+                event.subject_id === null ? "" : String(event.subject_id);
+            document.getElementById("calendarTopic").value = event.title;
+            document.getElementById("calendarTime").value = event.event_time || "";
+            document.getElementById("calendarDescription").value =
+                event.description || "";
+            document.getElementById("calendarReminder").value =
+                event.reminder_minutes === null ? "" : String(event.reminder_minutes);
+            document.getElementById("calendarEventType").value = event.event_type;
+            document.getElementById("saveCalendarEvent").textContent = "Update Event";
+        });
+    });
+
+    container.querySelectorAll("[data-delete-calendar-event]").forEach(button => {
+        button.addEventListener("click", async () => {
+            const eventId = Number(button.dataset.deleteCalendarEvent);
+            try {
+                await examReadyApi.delete(`/calendar/${eventId}`);
+                calendarEvents = calendarEvents.filter(event => event.id !== eventId);
+                renderCalendarDays();
+                renderSelectedCalendarEvents();
+            } catch (error) {
+                if (error.status === 401 || error.status === 422) {
+                    showDashboardApiError(error);
+                    return;
+                }
+                alert(`Could not delete the event: ${error.message}`);
+            }
+        });
+    });
+}
+
+
+async function saveCalendarEvent() {
 
     if (!selectedCalendarDate) {
         alert("Please select a date first.");
         return;
     }
 
-    const subject = document.getElementById("calendarSubject").value;
-    const topic = document.getElementById("calendarTopic").value.trim();
+    const subjectValue = document.getElementById("calendarSubject").value;
+    const title = document.getElementById("calendarTopic").value.trim();
     const type = document.getElementById("calendarEventType").value;
 
-    if (!subject) {
-        alert("Please select a subject.");
-        return;
-    }
-
-    if (!topic) {
-        alert("Please enter a topic.");
+    if (!title) {
+        alert("Please enter an event title.");
         return;
     }
 
     const event = {
-        id: Date.now(),
-        subject: subject,
-        topic: topic,
-        date: selectedCalendarDate
+        subject_id: subjectValue ? Number(subjectValue) : null,
+        title,
+        event_type: type,
+        event_date: selectedCalendarDate,
+        event_time: document.getElementById("calendarTime").value || null,
+        description: document.getElementById("calendarDescription").value.trim(),
+        reminder_minutes: document.getElementById("calendarReminder").value
+            ? Number(document.getElementById("calendarReminder").value)
+            : null
     };
 
-    if (type === "revision") {
-        studentData.revisions.push(event);
-    } else {
-        studentData.exams.push(event);
+    try {
+        const savedEvent = editingCalendarEventId
+            ? await examReadyApi.put(`/calendar/${editingCalendarEventId}`, event)
+            : await examReadyApi.post("/calendar", event);
+        calendarEvents = calendarEvents.filter(item => item.id !== savedEvent.id);
+        calendarEvents.push(savedEvent);
+        editingCalendarEventId = null;
+
+        document.getElementById("calendarTopic").value = "";
+        document.getElementById("calendarTime").value = "";
+        document.getElementById("calendarDescription").value = "";
+        document.getElementById("calendarReminder").value = "";
+        document.getElementById("calendarEventType").value = "revision";
+        document.getElementById("saveCalendarEvent").textContent = "Save Event";
+
+        renderCalendarDays();
+        renderSelectedCalendarEvents();
+    } catch (error) {
+        if (error.status === 401 || error.status === 422) {
+            showDashboardApiError(error);
+            return;
+        }
+        alert(`Could not save the event: ${error.message}`);
     }
-
-    saveData();
-
-    alert(
-        type === "revision"
-            ? "Revision scheduled successfully!"
-            : "Exam scheduled successfully!"
-    );
-
-    selectedCalendarDate = null;
-    renderCalendar();
 }
 
 
@@ -1200,50 +1607,120 @@ function openSchedule() {
 
     pageTitle.textContent = "Schedule";
     pageDescription.textContent =
-        "View exams, revisions and calculated exam readiness.";
+        "Add exam dates and review your upcoming study schedule.";
 
     const readiness = calculateReadiness();
+    const subjects = [...new Set(studentData.subjects
+        .map(subject => subject.name)
+        .filter(name => typeof name === "string" && name.trim()))];
+    const topics = [...new Set(studentData.subjects
+        .flatMap(subject => Array.isArray(subject.topics) ? subject.topics : [])
+        .map(topic => topic.name)
+        .filter(name => typeof name === "string" && name.trim()))];
+    const exams = studentData.exams
+        .slice()
+        .sort((first, second) =>
+            String(first.date || "").localeCompare(String(second.date || ""))
+    );
 
     contentArea.innerHTML = `
+
+        <div class="content-box schedule-exam-form">
+
+            <h2>Add an Exam</h2>
+            <p>Enter the subject, topic, and date for your exam.</p>
+
+            <form id="examScheduleForm" class="schedule-form">
+                <div class="schedule-field">
+                    <label for="examSubject">Subject</label>
+                    <input id="examSubject" name="subject" type="text"
+                           list="examSubjectOptions" maxlength="100"
+                           placeholder="Enter or select a subject" required>
+                    <datalist id="examSubjectOptions">
+                        ${subjects.map(subject => `
+                            <option value="${escapeHtml(subject)}"></option>
+                        `).join("")}
+                    </datalist>
+                </div>
+
+                <div class="schedule-field">
+                    <label for="examTopic">Topic</label>
+                    <input id="examTopic" name="topic" type="text"
+                           list="examTopicOptions" maxlength="150"
+                           placeholder="Enter or select a topic" required>
+                    <datalist id="examTopicOptions">
+                        ${topics.map(topic => `
+                            <option value="${escapeHtml(topic)}"></option>
+                        `).join("")}
+                    </datalist>
+                </div>
+
+                <div class="schedule-field">
+                    <label for="examDate">Exam Date</label>
+                    <input id="examDate" name="date" type="date" required>
+                </div>
+
+                <button type="submit" class="schedule-submit-btn">
+                    <i class="fa-solid fa-plus" aria-hidden="true"></i>
+                    Add Exam
+                </button>
+            </form>
+
+            <p id="examScheduleStatus" class="schedule-status" role="status" aria-live="polite"></p>
+
+        </div>
+
+        <br>
 
         <!-- EXAM TABLE -->
         <div class="content-box">
 
             <h2>Exam Schedule</h2>
 
-            <br>
-
-            <table style="width:100%; border-collapse:collapse;">
+            <div class="schedule-table-wrap">
+            <table class="schedule-table">
 
                 <thead>
                     <tr>
-                        <th style="text-align:left; padding:12px; border-bottom:1px solid #ddd;">Subject</th>
-                        <th style="text-align:left; padding:12px; border-bottom:1px solid #ddd;">Topic</th>
-                        <th style="text-align:left; padding:12px; border-bottom:1px solid #ddd;">Exam Date</th>
+                        <th scope="col">Subject</th>
+                        <th scope="col">Topic</th>
+                        <th scope="col">Exam Date</th>
+                        <th scope="col">Actions</th>
                     </tr>
                 </thead>
 
                 <tbody>
                     ${
-                        studentData.exams.length === 0
+                        exams.length === 0
                         ? `
                         <tr>
-                            <td colspan="3" style="padding:15px;">
+                            <td colspan="4" class="schedule-empty">
                                 No exams scheduled yet.
                             </td>
                         </tr>
                         `
-                        : studentData.exams.map(exam => `
+                        : exams.map(exam => `
                         <tr>
-                            <td style="padding:12px;">${escapeHtml(exam.subject)}</td>
-                            <td style="padding:12px;">${escapeHtml(exam.topic)}</td>
-                            <td style="padding:12px;">${escapeHtml(exam.date)}</td>
+                            <td>${escapeHtml(exam.subject)}</td>
+                            <td>${escapeHtml(exam.topic)}</td>
+                            <td>${escapeHtml(exam.date)}</td>
+                            <td class="schedule-action-cell">
+                                <button type="button" class="schedule-delete-btn"
+                                        data-exam-id="${exam.id}"
+                                        aria-label="Delete ${escapeHtml(exam.subject)} exam on ${escapeHtml(exam.date)}"
+                                        title="Delete exam">
+                                    <i class="fa-solid fa-trash" aria-hidden="true"></i>
+                                    Delete
+                                </button>
+                            </td>
                         </tr>
                         `).join("")
                     }
                 </tbody>
 
             </table>
+            </div>
+            <p id="scheduleDeleteStatus" class="schedule-status" role="status" aria-live="polite"></p>
 
         </div>
 
@@ -1319,6 +1796,81 @@ function openSchedule() {
 
         </div>
     `;
+
+    document.getElementById("examScheduleForm").addEventListener("submit", async function (event) {
+        event.preventDefault();
+
+        const subject = document.getElementById("examSubject").value.trim();
+        const topic = document.getElementById("examTopic").value.trim();
+        const date = document.getElementById("examDate").value;
+        const status = document.getElementById("examScheduleStatus");
+
+        if (!subject || !topic || !date) {
+            status.textContent = "Enter a subject, topic, and exam date.";
+            return;
+        }
+
+        const linkedSubject = studentData.subjects.find(
+            item => item.name.toLowerCase() === subject.toLowerCase()
+        );
+
+        try {
+            const exam = await examReadyApi.post("/exams", {
+                subject_id: linkedSubject ? linkedSubject.id : null,
+                exam_name: subject,
+                exam_date: date,
+                contents: topic
+            });
+            studentData.exams.push({
+                id: exam.id,
+                subject: exam.exam_name,
+                topic: exam.contents || "",
+                date: exam.exam_date,
+                subjectId: exam.subject_id
+            });
+            saveData();
+
+            const [year, month] = date.split("-").map(Number);
+            calendarDate.setFullYear(year, month - 1, 1);
+            calendarFocusDate = date;
+            openSchedule();
+            document.getElementById("examScheduleStatus").textContent =
+                "Exam saved to your schedule and calendar.";
+        } catch (error) {
+            console.error("Could not save exam:", error);
+            status.setAttribute("role", "alert");
+            status.textContent = `The exam could not be saved: ${error.message}`;
+        }
+    });
+
+    document.querySelectorAll(".schedule-delete-btn").forEach(button => {
+        button.addEventListener("click", async function () {
+            const exam = studentData.exams.find(
+                item => String(item.id) === this.dataset.examId
+            );
+
+            if (!exam)
+                return;
+
+            if (!window.confirm(`Delete the exam for "${exam.subject}" on ${exam.date}?`))
+                return;
+
+            try {
+                await examReadyApi.delete(`/exams/${exam.id}`);
+                studentData.exams = studentData.exams.filter(
+                    item => item.id !== exam.id
+                );
+                saveData();
+                openSchedule();
+                document.getElementById("scheduleDeleteStatus").textContent =
+                    "Exam deleted from your schedule and calendar.";
+            } catch (error) {
+                console.error("Could not delete exam:", error);
+                document.getElementById("scheduleDeleteStatus").textContent =
+                    `The exam could not be deleted: ${error.message}`;
+            }
+        });
+    });
 }
 
 
@@ -1434,100 +1986,6 @@ function openProfile() {
 
 
 /* =========================================================
-   AI ASSISTANT
-========================================================= */
-
-function openAI() {
-
-    clearTimer();
-
-    pageTitle.textContent = "AI Assistant";
-    pageDescription.textContent = "Ask questions related to your studies.";
-
-    contentArea.innerHTML = `
-        <div class="ai-container">
-
-            <h2>🤖 AI Study Assistant</h2>
-
-            <div class="chat-box" id="chatBox">
-                <div class="message ai-message">
-                    Hello! Ask me anything about your studies.
-                </div>
-            </div>
-
-            <div class="ai-input">
-                <input id="aiInput" type="text" placeholder="Ask a question...">
-                <button type="button" id="sendAI">
-                    <i class="fa-solid fa-paper-plane"></i>
-                </button>
-            </div>
-
-        </div>
-    `;
-
-    const input = document.getElementById("aiInput");
-    const button = document.getElementById("sendAI");
-    const chat = document.getElementById("chatBox");
-
-    function sendMessage() {
-
-        const question = input.value.trim();
-
-        if (!question)
-            return;
-
-        chat.insertAdjacentHTML("beforeend", `
-            <div class="message user-message">
-                ${escapeHtml(question)}
-            </div>
-        `);
-
-        input.value = "";
-        chat.scrollTop = chat.scrollHeight;
-
-        setTimeout(function () {
-
-            let answer =
-                "Revise the topic regularly and practice questions related to it.";
-
-            const q = question.toLowerCase();
-
-            if (q.includes("python")) {
-                answer = "For Python, focus on variables, loops, functions, lists, dictionaries and OOP.";
-            }
-            else if (q.includes("sql") || q.includes("dbms")) {
-                answer = "For DBMS and SQL, practice SELECT, JOIN, GROUP BY, normalization, keys and transactions.";
-            }
-            else if (q.includes("exam")) {
-                answer = "Focus on your incomplete topics first, then attempt quizzes and revise your mistakes.";
-            }
-
-            /* If the user left this page, the chat box is gone */
-            if (!document.body.contains(chat))
-                return;
-
-            chat.insertAdjacentHTML("beforeend", `
-                <div class="message ai-message">
-                    ${escapeHtml(answer)}
-                </div>
-            `);
-
-            chat.scrollTop = chat.scrollHeight;
-
-        }, 500);
-    }
-
-    button.addEventListener("click", sendMessage);
-
-    input.addEventListener("keypress", function (event) {
-        if (event.key === "Enter") {
-            sendMessage();
-        }
-    });
-}
-
-
-/* =========================================================
    TIMER
 ========================================================= */
 
@@ -1548,6 +2006,7 @@ function openTimer() {
             <p>25-minute focused session</p>
 
             <div class="timer-display" id="timerDisplay">25:00</div>
+            <p id="timerStatus" class="timer-status" role="status">Ready to focus.</p>
 
             <div class="timer-buttons">
                 <button type="button" id="startTimer">Start</button>
@@ -1556,6 +2015,16 @@ function openTimer() {
             </div>
 
         </div>
+
+        <div class="content-box timer-records">
+            <h2>Study Records</h2>
+            <div class="timer-totals">
+                <p>Focused study: <strong id="totalStudyTime">0m</strong></p>
+                <p>Time paused: <strong id="totalPausedTime">0m</strong></p>
+            </div>
+            <h3>Session history</h3>
+            <div id="timerSessionHistory" class="timer-session-history"></div>
+        </div>
     `;
 
     updateTimerDisplay();
@@ -1563,6 +2032,7 @@ function openTimer() {
     document.getElementById("startTimer").addEventListener("click", startTimer);
     document.getElementById("pauseTimer").addEventListener("click", pauseTimer);
     document.getElementById("resetTimer").addEventListener("click", resetTimer);
+    renderTimerStats();
 }
 
 
@@ -1571,23 +2041,60 @@ function startTimer() {
     if (timerRunning)
         return;
 
+    if (timerSeconds <= 0) {
+        const status = document.getElementById("timerStatus");
+        if (status)
+            status.textContent = "Reset the timer before starting another session.";
+        return;
+    }
+
+    if (!currentTimerSession) {
+        currentTimerSession = {
+            startedAt: new Date().toISOString(),
+            studySeconds: 0,
+            pausedSeconds: 0,
+            completed: false
+        };
+    }
+
+    if (timerPausedAt !== null) {
+        const pausedDuration = Math.max(0, Math.floor((Date.now() - timerPausedAt) / 1000));
+        currentTimerSession.pausedSeconds += pausedDuration;
+        studentData.pausedSeconds += pausedDuration;
+        timerPausedAt = null;
+        if (pausedDisplayInterval !== null) {
+            clearInterval(pausedDisplayInterval);
+            pausedDisplayInterval = null;
+        }
+        saveData();
+    }
+
     timerRunning = true;
+    document.getElementById("timerStatus").textContent = "Focused study in progress.";
 
     timerInterval = setInterval(function () {
 
         if (timerSeconds > 0) {
 
             timerSeconds--;
+            currentTimerSession.studySeconds++;
+            studentData.studySeconds++;
+            studentData.studyMinutes = Math.floor(studentData.studySeconds / 60);
             updateTimerDisplay();
+            renderTimerStats();
+
+            if (studentData.studySeconds % 15 === 0)
+                saveData();
 
         } else {
 
+            if (currentTimerSession)
+                currentTimerSession.completed = true;
             clearTimer();
-
-            studentData.studyMinutes += 25;
-            saveData();
-
-            alert("🎉 Study session completed!");
+            const status = document.getElementById("timerStatus");
+            if (status)
+                status.textContent = "Session complete. Your study record has been saved.";
+            window.alert("Study session completed!");
         }
 
     }, 1000);
@@ -1595,7 +2102,22 @@ function startTimer() {
 
 
 function pauseTimer() {
-    clearTimer();
+    if (!timerRunning || !currentTimerSession)
+        return;
+
+    if (timerInterval !== null)
+        clearInterval(timerInterval);
+    timerInterval = null;
+    timerRunning = false;
+    timerPausedAt = Date.now();
+    document.getElementById("timerStatus").textContent = "Timer paused. Paused time is being recorded.";
+
+    if (pausedDisplayInterval === null) {
+        pausedDisplayInterval = setInterval(renderTimerStats, 1000);
+    }
+
+    saveData();
+    renderTimerStats();
 }
 
 
@@ -1603,6 +2125,9 @@ function resetTimer() {
     clearTimer();
     timerSeconds = 25 * 60;
     updateTimerDisplay();
+    const status = document.getElementById("timerStatus");
+    if (status)
+        status.textContent = "Timer reset. Your session has been saved.";
 }
 
 
@@ -1611,9 +2136,103 @@ function clearTimer() {
     if (timerInterval !== null) {
         clearInterval(timerInterval);
     }
+    if (pausedDisplayInterval !== null) {
+        clearInterval(pausedDisplayInterval);
+    }
 
     timerInterval = null;
+    pausedDisplayInterval = null;
     timerRunning = false;
+
+    if (currentTimerSession) {
+        if (timerPausedAt !== null) {
+            const pausedDuration = Math.max(0, Math.floor((Date.now() - timerPausedAt) / 1000));
+            currentTimerSession.pausedSeconds += pausedDuration;
+            studentData.pausedSeconds += pausedDuration;
+        }
+
+        if (currentTimerSession.studySeconds > 0 || currentTimerSession.pausedSeconds > 0) {
+            studentData.timerSessions.push({
+                ...currentTimerSession,
+                endedAt: new Date().toISOString()
+            });
+            saveData();
+        }
+        currentTimerSession = null;
+    }
+
+    timerPausedAt = null;
+    renderTimerStats();
+}
+
+
+function formatTimerDuration(seconds) {
+    const totalSeconds = Math.max(0, Math.floor(Number(seconds) || 0));
+    const minutes = Math.floor(totalSeconds / 60);
+    const remainingSeconds = totalSeconds % 60;
+    return remainingSeconds
+        ? `${minutes}m ${remainingSeconds}s`
+        : `${minutes}m`;
+}
+
+
+function renderTimerStats() {
+    const studyTotal = document.getElementById("totalStudyTime");
+    const pausedTotal = document.getElementById("totalPausedTime");
+    const history = document.getElementById("timerSessionHistory");
+    if (!studyTotal || !pausedTotal || !history)
+        return;
+
+    const studySeconds = Number.isFinite(studentData.studySeconds)
+        ? studentData.studySeconds
+        : studentData.studyMinutes * 60;
+    const currentPauseSeconds = timerPausedAt === null
+        ? 0
+        : Math.max(0, Math.floor((Date.now() - timerPausedAt) / 1000));
+    const pausedSeconds = studentData.pausedSeconds + currentPauseSeconds;
+    studyTotal.textContent = formatTimerDuration(studySeconds);
+    pausedTotal.textContent = formatTimerDuration(pausedSeconds);
+
+    const sessions = studentData.timerSessions.slice().reverse();
+    if (currentTimerSession) {
+        sessions.unshift({
+            ...currentTimerSession,
+            pausedSeconds: currentTimerSession.pausedSeconds + currentPauseSeconds,
+            inProgress: true
+        });
+    }
+
+    if (!sessions.length) {
+        history.innerHTML = `<p class="timer-history-empty">No study sessions recorded yet. Start the timer to begin.</p>`;
+        return;
+    }
+
+    history.innerHTML = sessions.map(session => {
+        const startedAt = typeof session.startedAt === "string"
+            ? new Date(session.startedAt)
+            : null;
+        const sessionDate = startedAt && !Number.isNaN(startedAt.getTime())
+            ? startedAt.toLocaleString()
+            : "Study session";
+        const sessionStatus = session.inProgress
+            ? "In progress"
+            : session.completed
+                ? "Completed"
+                : "Ended";
+
+        return `
+            <article class="timer-session-row">
+                <div>
+                    <strong>${escapeHtml(sessionDate)}</strong>
+                    <span>${sessionStatus}</span>
+                </div>
+                <div class="timer-session-duration">
+                    <span>Studied: ${formatTimerDuration(session.studySeconds)}</span>
+                    <span>Paused: ${formatTimerDuration(session.pausedSeconds)}</span>
+                </div>
+            </article>
+        `;
+    }).join("");
 }
 
 
@@ -1667,6 +2286,8 @@ function openLogout() {
     `;
 
     document.getElementById("confirmLogout").addEventListener("click", function () {
+        sessionStorage.removeItem("accessToken");
+        sessionStorage.removeItem("userId");
         sessionStorage.removeItem("isLoggedIn");
         sessionStorage.removeItem("userName");
         window.location.replace("./dashboard.html");
@@ -1686,17 +2307,25 @@ const pages = {
     dashboard: openDashboard,
     subjects:  openSubjects,
     reports:   openReports,
-    quiz:      openQuiz,
     schedule:  openSchedule,
     calendar:  openCalendar,
     profile:   openProfile,
-    ai:        openAI,
     timer:     openTimer,
     logout:    openLogout
 };
 
 
-function navigateTo(page) {
+function navigateTo(page, options) {
+    if (page === "ai") {
+        const params = new URLSearchParams();
+        if (options?.subjectId !== undefined)
+            params.set("subjectId", String(options.subjectId));
+        if (options?.documentId !== undefined)
+            params.set("documentId", String(options.documentId));
+        const query = params.toString();
+        window.location.href = `ai%20assistent.html${query ? `?${query}` : ""}`;
+        return;
+    }
 
     const renderPage = pages[page];
 
@@ -1721,7 +2350,7 @@ function navigateTo(page) {
     }
 
     try {
-        renderPage();
+        renderPage(options);
     } catch (error) {
         console.error(`Failed to open "${page}":`, error);
         contentArea.innerHTML = `
@@ -1731,6 +2360,15 @@ function navigateTo(page) {
         `;
     }
 
+    currentDashboardPage = page;
+    if (["dashboard", "subjects", "reports", "schedule"].includes(page)) {
+        refreshDashboardData().then(() => {
+            if (currentDashboardPage === page) {
+                renderPage(options);
+            }
+        }).catch(showDashboardApiError);
+    }
+
     window.scrollTo(0, 0);
 }
 
@@ -1738,6 +2376,9 @@ function navigateTo(page) {
 /* Sidebar links */
 menuLinks.forEach(link => {
     link.addEventListener("click", function (event) {
+        if (this.dataset.page === "quiz")
+            return;
+
         event.preventDefault();
         navigateTo(this.dataset.page);
     });
@@ -1756,5 +2397,6 @@ if (backButton) {
    START APPLICATION
 ========================================================= */
 
+window.addEventListener("pagehide", clearTimer);
 applyProfileName();
 navigateTo("dashboard");

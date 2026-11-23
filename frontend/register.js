@@ -14,11 +14,11 @@ togglePassword.addEventListener("click", function () {
         isPasswordHidden ? "Hide password" : "Show password"
     );
     togglePassword.innerHTML = isPasswordHidden
-        ? '<i class="fa-regular fa-eye-slash"></i>'
-        : '<i class="fa-regular fa-eye"></i>';
+        ? '<i class="fa-regular fa-eye-slash" aria-hidden="true"></i>'
+        : '<i class="fa-regular fa-eye" aria-hidden="true"></i>';
 });
 
-registerForm.addEventListener("submit", function (event) {
+registerForm.addEventListener("submit", async function (event) {
     event.preventDefault();
     statusMessage.textContent = "";
 
@@ -50,32 +50,32 @@ registerForm.addEventListener("submit", function (event) {
         return;
     }
 
-    let existingUser;
-    try {
-        existingUser = localStorage.getItem("registeredUser");
-    } catch (error) {
-        console.error("Could not access browser storage:", error);
-        statusMessage.textContent = "Account storage is unavailable in this browser.";
-        return;
-    }
-
-    if (existingUser) {
-        statusMessage.textContent =
-            "An account is already registered in this browser. Please log in.";
-        return;
-    }
+    const submitButton = registerForm.querySelector('button[type="submit"]');
+    submitButton.disabled = true;
+    submitButton.textContent = "Creating account...";
 
     try {
-        localStorage.setItem("registeredUser", JSON.stringify({
-            name: name,
-            email: email,
-            password: password
-        }));
-    } catch (error) {
-        console.error("Could not save registered account:", error);
-        statusMessage.textContent = "Could not save your account. Please try again.";
-        return;
-    }
+        await examReadyApi.postPublic("/auth/register", {
+            name,
+            email,
+            password
+        });
 
-    window.location.replace("./login.html");
+        statusMessage.textContent = "Registration successful. Redirecting to login...";
+        setTimeout(function () {
+            window.location.replace("./login.html");
+        }, 1000);
+    } catch (error) {
+        if (error.status) {
+            statusMessage.textContent =
+                error.message || "Registration failed. Please try again.";
+        } else {
+            console.error("Could not reach the registration service:", error);
+            statusMessage.textContent =
+                "Could not connect to the server. Make sure the backend is running and try again.";
+        }
+    } finally {
+        submitButton.disabled = false;
+        submitButton.textContent = "Create Account";
+    }
 });
